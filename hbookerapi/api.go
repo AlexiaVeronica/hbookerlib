@@ -20,7 +20,7 @@ func (hbooker *API) setDefaultParams(account, loginToken string) {
 
 func (hbooker *API) GetBookInfo(bookId string) (*hbookermodel.BookInfo, error) {
 	var book hbookermodel.Detail
-	_, err := hbooker.HttpClient.Post(BOOK_GET_INFO_BY_ID, map[string]string{"book_id": bookId}, &book)
+	_, err := hbooker.HttpClient.Post(BookGetInfoById, map[string]string{"book_id": bookId}, &book)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func (hbooker *API) GetBookInfo(bookId string) (*hbookermodel.BookInfo, error) {
 
 func (hbooker *API) GetDivisionListByBookId(bookId string) ([]hbookermodel.VolumeList, error) {
 	var divisionList hbookermodel.NewVolumeList
-	_, err := hbooker.HttpClient.Post(GET_DIVISION_LIST_NEW, map[string]string{"book_id": bookId}, &divisionList)
+	_, err := hbooker.HttpClient.Post(GetDivisionListNew, map[string]string{"book_id": bookId}, &divisionList)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (hbooker *API) GetDivisionListByBookId(bookId string) ([]hbookermodel.Volum
 
 func (hbooker *API) GetKetByChapterId(chapterId string) (string, error) {
 	var m hbookermodel.ContentKey
-	_, err := hbooker.HttpClient.Post(GET_CHAPTER_KEY, map[string]string{"chapter_id": chapterId}, &m)
+	_, err := hbooker.HttpClient.Post(GetChapterKey, map[string]string{"chapter_id": chapterId}, &m)
 	if err != nil {
 		return "", err
 	}
@@ -72,7 +72,7 @@ func (hbooker *API) GetKetByChapterId(chapterId string) (string, error) {
 
 func (hbooker *API) GetChapterContentAPI(chapterId, chapterKey string) (*hbookermodel.ChapterInfo, error) {
 	var content hbookermodel.Content
-	_, err := hbooker.HttpClient.Post(GET_CPT_IFM, map[string]string{"chapter_id": chapterId, "chapter_command": chapterKey}, &content)
+	_, err := hbooker.HttpClient.Post(GetCptIfm, map[string]string{"chapter_id": chapterId, "chapter_command": chapterKey}, &content)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +89,7 @@ func (hbooker *API) GetChapterContentAPI(chapterId, chapterKey string) (*hbooker
 
 func (hbooker *API) GetLoginTokenAPI(username, password string) (*hbookermodel.Login, error) {
 	var login hbookermodel.Login
-	_, err := hbooker.HttpClient.Post(MY_SIGN_LOGIN, map[string]string{"login_name": username, "password": password}, &login)
+	_, err := hbooker.HttpClient.Post(MySignLogin, map[string]string{"login_name": username, "password": password}, &login)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (hbooker *API) GetLoginTokenAPI(username, password string) (*hbookermodel.L
 
 func (hbooker *API) GetBuyChapterAPI(chapterId, shelfId string) (*hbookermodel.ContentBuy, error) {
 	var m hbookermodel.ContentBuy
-	_, err := hbooker.HttpClient.Post(CHAPTER_BUY, map[string]string{"chapter_id": chapterId, "shelf_id": shelfId}, &m)
+	_, err := hbooker.HttpClient.Post(ChapterBuy, map[string]string{"chapter_id": chapterId, "shelf_id": shelfId}, &m)
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +135,7 @@ func (hbooker *API) GetAutoSignAPI(device string) (*hbookermodel.LoginData, erro
 
 func (hbooker *API) GetUseGeetestAPI(loginName string) (*hbookermodel.Geetest, error) {
 	var geetest hbookermodel.Geetest
-	_, err := hbooker.HttpClient.Post(USE_GEETEST, map[string]string{"login_name": loginName}, &geetest)
+	_, err := hbooker.HttpClient.Post(UseGeetest, map[string]string{"login_name": loginName}, &geetest)
 	if err != nil {
 		return nil, err
 	}
@@ -147,7 +147,7 @@ func (hbooker *API) GetUseGeetestAPI(loginName string) (*hbookermodel.Geetest, e
 
 func (hbooker *API) GetGeetestRegisterAPI(UserID string) (*hbookermodel.Challenge, error) {
 	var challenge hbookermodel.Challenge
-	_, err := hbooker.HttpClient.Post(GEETEST_REGISTER, map[string]string{"user_id": UserID, "t": strconv.FormatInt(time.Now().UnixNano()/1e6, 10)}, &challenge)
+	_, err := hbooker.HttpClient.Post(GeetestRegister, map[string]string{"user_id": UserID, "t": strconv.FormatInt(time.Now().UnixNano()/1e6, 10)}, &challenge)
 	if err != nil {
 		return nil, err
 	}
@@ -159,7 +159,7 @@ func (hbooker *API) GetGeetestRegisterAPI(UserID string) (*hbookermodel.Challeng
 
 func (hbooker *API) GetBookShelfIndexesInfoAPI(shelfId string) ([]hbookermodel.ShelfBookList, error) {
 	var bookList hbookermodel.ShelfBook
-	_, err := hbooker.HttpClient.Post(BOOKSHELF_GET_SHELF_BOOK_LIST, map[string]string{"shelf_id": shelfId, "direction": "prev", "last_mod_time": "0"}, &bookList)
+	_, err := hbooker.HttpClient.Post(BookshelfGetShelfBookList, map[string]string{"shelf_id": shelfId, "direction": "prev", "last_mod_time": "0"}, &bookList)
 	if err != nil {
 		return nil, err
 	}
@@ -174,7 +174,7 @@ func (hbooker *API) GetBookShelfIndexesInfoAPI(shelfId string) ([]hbookermodel.S
 
 func (hbooker *API) GetBookShelfInfoAPI() ([]hbookermodel.ShelfList, error) {
 	var shelfList hbookermodel.Shelf
-	_, err := hbooker.HttpClient.Post(BOOKSHELF_GET_SHELF_LIST, map[string]string{}, &shelfList)
+	_, err := hbooker.HttpClient.Post(BookshelfGetShelfList, map[string]string{}, &shelfList)
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +189,7 @@ func (hbooker *API) GetBookShelfInfoAPI() ([]hbookermodel.ShelfList, error) {
 
 func (hbooker *API) GetSearchBooksAPI(keyWord string, page int) ([]hbookermodel.BookInfo, error) {
 	var search hbookermodel.Search
-	_, err := hbooker.HttpClient.Post(BOOKCITY_GET_FILTER_LIST, map[string]string{"count": "10", "page": strconv.Itoa(page), "category_index": "0", "key": keyWord}, &search)
+	_, err := hbooker.HttpClient.Post(BookcityGetFilterList, map[string]string{"count": "10", "page": strconv.Itoa(page), "category_index": "0", "key": keyWord}, &search)
 	if err != nil {
 		return nil, err
 	}

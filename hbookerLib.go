@@ -10,7 +10,7 @@ type Client struct {
 }
 
 func NewClient(options ...Options) *Client {
-	c := &Client{
+	client := &Client{
 		API: &hbookerapi.API{
 			HttpClient: hbookerapi.HttpsClient{
 				Debug:         false,
@@ -24,9 +24,9 @@ func NewClient(options ...Options) *Client {
 		},
 	}
 	for _, option := range options {
-		option.Apply(c)
+		option.Apply(client)
 	}
-	return c
+	return client
 }
 
 type Options interface {
