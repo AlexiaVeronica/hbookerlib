@@ -32,6 +32,7 @@ func (httpsClient *HttpsClient) defaultFormData() map[string]string {
 }
 func (httpsClient *HttpsClient) NewDefault() *req.Client {
 	c := req.C().
+		SetCommonRetryCount(5).
 		SetTimeout(30 * time.Second).
 		SetBaseURL(httpsClient.APIBaseURL).
 		SetCommonHeaders(httpsClient.defaultHeader())

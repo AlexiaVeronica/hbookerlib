@@ -13,6 +13,11 @@ type API struct {
 	HttpClient HttpsClient
 }
 
+func (hbooker *API) setDefaultParams(account, loginToken string) {
+	hbooker.HttpClient.Account = account
+	hbooker.HttpClient.LoginToken = loginToken
+}
+
 func (hbooker *API) GetBookInfo(bookId string) (*hbookermodel.BookInfo, error) {
 	var book hbookermodel.Detail
 	_, err := hbooker.HttpClient.Post(BOOK_GET_INFO_BY_ID, map[string]string{"book_id": bookId}, &book)
@@ -91,8 +96,13 @@ func (hbooker *API) GetLoginTokenAPI(username, password string) (*hbookermodel.L
 	if login.Code != "100000" {
 		return nil, fmt.Errorf("get login token error: %s", login.Tip)
 	}
+	if login.Data.LoginToken == "" || login.Data.ReaderInfo.Account == "" {
+		return nil, fmt.Errorf("get login token error: %s", "login token or account is empty")
+	}
+	hbooker.setDefaultParams(login.Data.ReaderInfo.Account, login.Data.LoginToken)
 	return &login, nil
 }
+
 func (hbooker *API) GetBuyChapterAPI(chapterId, shelfId string) (*hbookermodel.ContentBuy, error) {
 	var m hbookermodel.ContentBuy
 	_, err := hbooker.HttpClient.Post(CHAPTER_BUY, map[string]string{"chapter_id": chapterId, "shelf_id": shelfId}, &m)
@@ -119,6 +129,7 @@ func (hbooker *API) GetAutoSignAPI(device string) (*hbookermodel.LoginData, erro
 	if m.Code != "100000" {
 		return nil, fmt.Errorf("get auto sign error: %s", m.Tip)
 	}
+	hbooker.setDefaultParams(m.Data.ReaderInfo.Account, m.Data.LoginToken)
 	return &m.Data, nil
 }
 

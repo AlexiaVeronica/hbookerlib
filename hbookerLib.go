@@ -1,4 +1,4 @@
-package HbookerLib
+package hbookerLib
 
 import (
 	"github.com/AlexiaVeronica/hbookerLib/hbookerapi"
