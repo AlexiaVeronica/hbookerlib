@@ -13,11 +13,6 @@ type API struct {
 	HttpClient HttpsClient
 }
 
-func (hbooker *API) setDefaultParams(account, loginToken string) {
-	hbooker.HttpClient.Account = account
-	hbooker.HttpClient.LoginToken = loginToken
-}
-
 func (hbooker *API) GetBookInfo(bookId string) (*hbookermodel.BookInfo, error) {
 	var book hbookermodel.Detail
 	_, err := hbooker.HttpClient.Post(BookGetInfoById, map[string]string{"book_id": bookId}, &book)
@@ -55,7 +50,7 @@ func (hbooker *API) GetDivisionListByBookId(bookId string) ([]hbookermodel.Volum
 	return divisionList.Data.ChapterList, nil
 }
 
-func (hbooker *API) GetKetByChapterId(chapterId string) (string, error) {
+func (hbooker *API) GetChapterKey(chapterId string) (string, error) {
 	var m hbookermodel.ContentKey
 	_, err := hbooker.HttpClient.Post(GetChapterKey, map[string]string{"chapter_id": chapterId}, &m)
 	if err != nil {
@@ -82,8 +77,6 @@ func (hbooker *API) GetChapterContentAPI(chapterId, chapterKey string) (*hbooker
 	if content.Data.ChapterInfo.TxtContent == "" {
 		return nil, fmt.Errorf("get chapter content error: %s", "content is empty")
 	}
-	content.Data.ChapterInfo.TxtContent = string(HbookerDecode(content.Data.ChapterInfo.TxtContent, chapterKey))
-
 	return &content.Data.ChapterInfo, nil
 }
 
@@ -99,7 +92,8 @@ func (hbooker *API) GetLoginTokenAPI(username, password string) (*hbookermodel.L
 	if login.Data.LoginToken == "" || login.Data.ReaderInfo.Account == "" {
 		return nil, fmt.Errorf("get login token error: %s", "login token or account is empty")
 	}
-	hbooker.setDefaultParams(login.Data.ReaderInfo.Account, login.Data.LoginToken)
+	hbooker.HttpClient.Account = login.Data.ReaderInfo.Account
+	hbooker.HttpClient.LoginToken = login.Data.LoginToken
 	return &login, nil
 }
 
@@ -129,7 +123,8 @@ func (hbooker *API) GetAutoSignAPI(device string) (*hbookermodel.LoginData, erro
 	if m.Code != "100000" {
 		return nil, fmt.Errorf("get auto sign error: %s", m.Tip)
 	}
-	hbooker.setDefaultParams(m.Data.ReaderInfo.Account, m.Data.LoginToken)
+	hbooker.HttpClient.Account = m.Data.ReaderInfo.Account
+	hbooker.HttpClient.LoginToken = m.Data.LoginToken
 	return &m.Data, nil
 }
 
@@ -187,9 +182,10 @@ func (hbooker *API) GetBookShelfInfoAPI() ([]hbookermodel.ShelfList, error) {
 	return shelfList.Data.ShelfList, nil
 }
 
-func (hbooker *API) GetSearchBooksAPI(keyWord string, page int) ([]hbookermodel.BookInfo, error) {
+func (hbooker *API) GetSearchBooksAPI(keyword string, page any) ([]hbookermodel.BookInfo, error) {
 	var search hbookermodel.Search
-	_, err := hbooker.HttpClient.Post(BookcityGetFilterList, map[string]string{"count": "10", "page": strconv.Itoa(page), "category_index": "0", "key": keyWord}, &search)
+	params := map[string]string{"count": "10", "page": fmt.Sprintf("%v", page), "category_index": "0", "key": keyword}
+	_, err := hbooker.HttpClient.Post(BookcityGetFilterList, params, &search)
 	if err != nil {
 		return nil, err
 	}
