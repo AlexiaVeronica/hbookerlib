@@ -1,7 +1,10 @@
 package hbookerLib
 
 import (
+	"fmt"
 	"github.com/AlexiaVeronica/hbookerLib/hbookerapi"
+	"github.com/AlexiaVeronica/hbookerLib/hbookermodel"
+	"sync"
 )
 
 type Client struct {
@@ -43,4 +46,35 @@ func (client *Client) NewGetContent(chapterId string) (string, error) {
 	}
 	return string(hbookerapi.HbookerDecode(content.TxtContent, key)), nil
 
+}
+func (client *Client) Download(bookId string, continueFunc func(string) bool, contentFunc func(hbookermodel.ChapterList, string)) error {
+	divisionList, err := client.API.GetDivisionListByBookId(bookId)
+	if err != nil {
+		return err
+	}
+	wg := sync.WaitGroup{}
+	ch := make(chan int, 42)
+	for _, division := range divisionList {
+		for _, chapter := range division.ChapterList {
+			ch <- 1
+			wg.Add(1)
+			go func(chapter hbookermodel.ChapterList, wg *sync.WaitGroup, ch chan int) {
+				defer func() {
+					<-ch
+					wg.Done()
+				}()
+				if continueFunc(chapter.ChapterID) {
+					return
+				}
+				content, ok := client.NewGetContent(chapter.ChapterID)
+				if ok != nil {
+					fmt.Println(ok)
+				} else {
+					contentFunc(chapter, content)
+				}
+			}(chapter, &wg, ch)
+		}
+	}
+	wg.Wait()
+	return nil
 }
