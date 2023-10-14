@@ -49,15 +49,17 @@ func (client *Client) NewGetContent(chapterId string) (string, error) {
 }
 func (client *Client) Download(bookId string,
 	continueFunc func(hbookermodel.ChapterList) bool,
-	contentFunc func(hbookermodel.ChapterList, string)) error {
+	contentFunc func(hbookermodel.ChapterList, string),
+) error {
+
 	divisionList, err := client.API.GetDivisionListByBookId(bookId)
 	if err != nil {
 		return err
 	}
 	wg := sync.WaitGroup{}
 	ch := make(chan int, 42)
-	var count int
 	for _, division := range divisionList {
+		var count int
 		for _, chapter := range division.ChapterList {
 			ch <- 1
 			wg.Add(1)
