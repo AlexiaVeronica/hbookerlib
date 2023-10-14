@@ -63,7 +63,7 @@ func (client *Client) Download(bookId string, continueFunc func(string) bool, co
 					<-ch
 					wg.Done()
 				}()
-				if continueFunc(chapter.ChapterID) {
+				if !continueFunc(chapter.ChapterID) {
 					return
 				}
 				content, ok := client.NewGetContent(chapter.ChapterID)
