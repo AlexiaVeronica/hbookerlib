@@ -36,6 +36,21 @@ func (hbooker *API) GetBookInfo(bookId string) (*hbookermodel.BookInfo, error) {
 	return &book.Data.BookInfo, nil
 }
 
+func (hbooker *API) GetUserInfo() (*hbookermodel.UserInfoData, error) {
+	var m hbookermodel.UserInfo
+	if hbooker.HttpClient.LoginToken == "" || hbooker.HttpClient.Account == "" {
+		return nil, fmt.Errorf("get user info error: %s", "login token or account is empty")
+	}
+	_, err := hbooker.HttpClient.Post(urlconstants.MY_DETAILS_INFO, nil, &m)
+	if err != nil {
+		return nil, err
+	}
+	if m.Code != "100000" {
+		return nil, fmt.Errorf("get user info error: %s", m.Tip)
+	}
+	return &m.Data, nil
+}
+
 func (hbooker *API) GetDivisionListByBookId(bookId string) ([]hbookermodel.VolumeList, error) {
 	var divisionList hbookermodel.NewVolumeList
 	_, err := hbooker.HttpClient.Post(urlconstants.GetDivisionListNew, map[string]string{"book_id": bookId}, &divisionList)
@@ -65,7 +80,6 @@ func (hbooker *API) GetChapterKey(chapterId string) (string, error) {
 	}
 	return m.Data.Command, nil
 }
-
 func (hbooker *API) GetChapterContentAPI(chapterId, chapterKey string) (*hbookermodel.ChapterInfo, error) {
 	var content hbookermodel.Content
 	_, err := hbooker.HttpClient.Post(urlconstants.GetCptIfm, map[string]string{"chapter_id": chapterId, "chapter_command": chapterKey}, &content)
@@ -83,21 +97,28 @@ func (hbooker *API) GetChapterContentAPI(chapterId, chapterKey string) (*hbooker
 	return &content.Data.ChapterInfo, nil
 }
 
-func (hbooker *API) GetLoginTokenAPI(username, password string) (*hbookermodel.Login, error) {
+// Deprecated: MySignLogin is deprecated, hbooker has joined login verification, so this method is no longer available
+func (hbooker *API) MySignLogin(username, password, validate, challenge string) (*hbookermodel.LoginData, error) {
 	var login hbookermodel.Login
-	_, err := hbooker.HttpClient.Post(urlconstants.MySignLogin, map[string]string{"login_name": username, "password": password}, &login)
+	params := map[string]string{"login_name": username, "passwd": password}
+	if validate != "" {
+		params["geetest_seccode"] = validate + "|jordan"
+		params["geetest_validate"] = validate
+		params["geetest_challenge"] = challenge
+	}
+	_, err := hbooker.HttpClient.Post(urlconstants.MySignLogin, params, &login)
 	if err != nil {
 		return nil, err
 	}
 	if login.Code != "100000" {
 		return nil, fmt.Errorf("get login token error: %s", login.Tip)
 	}
-	if login.Data.LoginToken == "" || login.Data.ReaderInfo.Account == "" {
-		return nil, fmt.Errorf("get login token error: %s", "login token or account is empty")
+	if login.Data.LoginToken == "" {
+		return nil, fmt.Errorf("get login token error: %s", "login token is empty")
 	}
 	hbooker.HttpClient.Account = login.Data.ReaderInfo.Account
 	hbooker.HttpClient.LoginToken = login.Data.LoginToken
-	return &login, nil
+	return &login.Data, nil
 }
 
 func (hbooker *API) GetBuyChapterAPI(chapterId, shelfId string) (*hbookermodel.ContentBuy, error) {

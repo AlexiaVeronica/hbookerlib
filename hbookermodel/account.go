@@ -1,5 +1,23 @@
 package hbookermodel
 
+type UserInfo struct {
+	Code string       `json:"code"`
+	Tip  interface{}  `json:"tip"`
+	Data UserInfoData `json:"data"`
+}
+
+type UserInfoData struct {
+	ReaderInfo      ReaderInfo `json:"reader_info"`
+	PropInfo        PropInfo   `json:"prop_info"`
+	TrackAmount     string     `json:"track_amount"`
+	FollowingAmount string     `json:"following_amount"`
+	FollowedAmount  string     `json:"followed_amount"`
+	OneMoreTask     string     `json:"one_more_task"`
+	OneMoreMessage  string     `json:"one_more_message"`
+	InternalVersion string     `json:"internal_version"`
+	EntryCheck      string     `json:"entry_check"`
+	IsSetYoung      string     `json:"is_set_young"`
+}
 type ReaderInfo struct {
 	ReaderId       string        `json:"reader_id"`
 	Account        string        `json:"account"`

@@ -30,6 +30,14 @@ func WithAccountAndLoginToken(account, loginToken string) Options {
 	return OptionFunc(func(client *Client) {
 		WithAccount(account).Apply(client)
 		WithLoginToken(loginToken).Apply(client)
+		_, err := client.API.GetUserInfo()
+		if err != nil {
+			log.Println(err)
+			client.API.HttpClient.Account = ""
+			client.API.HttpClient.LoginToken = ""
+			return
+		}
+
 	})
 }
 func WithVersion(version string) Options {
