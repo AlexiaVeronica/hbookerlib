@@ -1,17 +1,17 @@
 package hbookermodel
 
 type Geetest struct {
-	Code int         `json:"code"`
+	Code string      `json:"code"`
 	Tip  string      `json:"tip"`
 	Data GeetestData `json:"data"`
 }
 
 type GeetestData struct {
-	NeedUseGeetest int `json:"need_use_geetest"`
-	CodeLen        int `json:"code_len"`
+	NeedUseGeetest string `json:"need_use_geetest"`
+	CodeLen        string `json:"code_len"`
 }
 
-type Challenge struct {
+type GeetestFirstRegisterStruct struct {
 	Success    int    `json:"success"`
 	Gt         string `json:"gt"`
 	Challenge  string `json:"challenge"`

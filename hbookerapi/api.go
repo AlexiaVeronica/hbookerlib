@@ -128,28 +128,28 @@ func (hbooker *API) GetAutoSignAPI(device string) (*hbookermodel.LoginData, erro
 	return &m.Data, nil
 }
 
-func (hbooker *API) GetUseGeetestAPI(loginName string) (*hbookermodel.Geetest, error) {
+func (hbooker *API) GetUseGeetestAPI(loginName string) (*hbookermodel.GeetestData, error) {
 	var geetest hbookermodel.Geetest
 	_, err := hbooker.HttpClient.Post(UseGeetest, map[string]string{"login_name": loginName}, &geetest)
 	if err != nil {
 		return nil, err
 	}
-	if geetest.Code != 100000 {
+	if geetest.Code != "100000" {
 		return nil, fmt.Errorf("get geetest error: %s", geetest.Tip)
 	}
-	return &geetest, nil
+	return &geetest.Data, nil
 }
 
-func (hbooker *API) GetGeetestRegisterAPI(UserID string) (*hbookermodel.Challenge, error) {
-	var challenge hbookermodel.Challenge
-	_, err := hbooker.HttpClient.Post(GeetestRegister, map[string]string{"user_id": UserID, "t": strconv.FormatInt(time.Now().UnixNano()/1e6, 10)}, &challenge)
+func (hbooker *API) GetGeetestRegisterAPI(UserID string) (*hbookermodel.GeetestFirstRegisterStruct, error) {
+	var geetestFirstRegister hbookermodel.GeetestFirstRegisterStruct
+	_, err := hbooker.HttpClient.Post(GeetestRegister, map[string]string{"user_id": UserID, "t": strconv.FormatInt(time.Now().UnixNano()/1e6, 10)}, &geetestFirstRegister)
 	if err != nil {
 		return nil, err
 	}
-	if challenge.Challenge == "" {
+	if geetestFirstRegister.Challenge == "" {
 		return nil, fmt.Errorf("get geetest register error: %s", "challenge is empty")
 	}
-	return &challenge, nil
+	return &geetestFirstRegister, nil
 }
 
 func (hbooker *API) GetBookShelfIndexesInfoAPI(shelfId string) ([]hbookermodel.ShelfBookList, error) {
