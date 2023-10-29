@@ -1,6 +1,8 @@
 package hbookerLib
 
-import "log"
+import (
+	"log"
+)
 
 type Options interface {
 	Apply(client *Client)
@@ -22,6 +24,12 @@ func WithLoginToken(loginToken string) Options {
 func WithAccount(account string) Options {
 	return OptionFunc(func(client *Client) {
 		client.API.HttpClient.Account = account
+	})
+}
+func WithAccountAndLoginToken(account, loginToken string) Options {
+	return OptionFunc(func(client *Client) {
+		WithAccount(account).Apply(client)
+		WithLoginToken(loginToken).Apply(client)
 	})
 }
 func WithVersion(version string) Options {
