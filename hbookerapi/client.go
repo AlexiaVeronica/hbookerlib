@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/imroc/req/v3"
+	"regexp"
 	"time"
 )
 
@@ -66,7 +67,11 @@ func (httpsClient *HttpsClient) Post(path string, params map[string]string, mode
 		return nil, fmt.Errorf("response is not success state: %v", response.String())
 	}
 	if model != nil {
-		err = json.Unmarshal(HbookerDecode(response.String(), httpsClient.AndroidApiKey), model)
+		result := response.String()
+		if match, _ := regexp.MatchString(`^\{.*}$`, result); !match {
+			result = string(HbookerDecode(response.String(), httpsClient.AndroidApiKey))
+		}
+		err = json.Unmarshal([]byte(result), model)
 		if err != nil {
 			return nil, fmt.Errorf("json unmarshal error: %v", err)
 		}
@@ -83,9 +88,13 @@ func (httpsClient *HttpsClient) Get(path string, params map[string]string, model
 		return nil, fmt.Errorf("response is not success state: %v", response.String())
 	}
 	if model != nil {
-		err = response.UnmarshalJson(model)
+		result := response.String()
+		if match, _ := regexp.MatchString(`^\{.*}$`, result); !match {
+			result = string(HbookerDecode(response.String(), httpsClient.AndroidApiKey))
+		}
+		err = json.Unmarshal([]byte(result), model)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("json unmarshal error: %v", err)
 		}
 	}
 	return response, nil
