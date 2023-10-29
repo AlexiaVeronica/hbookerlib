@@ -1,4 +1,4 @@
-package hbookerapi
+package urlconstants
 
 const ABOUT_URL = "setting/view_about"
 const ADD_BBS_COMMENT = "bbs/add_bbs_comment"
