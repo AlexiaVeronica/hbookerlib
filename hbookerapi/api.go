@@ -77,6 +77,8 @@ func (hbooker *API) GetChapterContentAPI(chapterId, chapterKey string) (*hbooker
 	}
 	if content.Data.ChapterInfo.TxtContent == "" {
 		return nil, fmt.Errorf("get chapter content error: %s", "content is empty")
+	} else {
+		content.Data.ChapterInfo.TxtContent = string(HbookerDecode(content.Data.ChapterInfo.TxtContent, chapterKey))
 	}
 	return &content.Data.ChapterInfo, nil
 }
