@@ -1,25 +1,24 @@
-package hbookerapi
+package hbookerLib
 
 import (
 	"fmt"
-	"github.com/AlexiaVeronica/hbookerLib/hbookerapi/urlconstants"
 	"github.com/AlexiaVeronica/hbookerLib/hbookermodel"
+	"github.com/AlexiaVeronica/hbookerLib/urlconstants"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 )
 
-type API struct {
-	HttpClient HttpsClient
-}
+var checkDeviceRegex = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`)
 
-func (hbooker *API) GetBookInfo(bookId string) (*hbookermodel.BookInfo, error) {
+func (api *API) GetBookInfo(bookId string) (*hbookermodel.BookInfo, error) {
 	var book hbookermodel.Detail
-	_, err := hbooker.HttpClient.Post(urlconstants.BookGetInfoById, map[string]string{"book_id": bookId}, &book)
+	res, err := api.HttpRequest.SetFormData(map[string]string{"book_id": bookId}).Post(urlconstants.BookGetInfoById)
 	if err != nil {
 		return nil, err
 	}
+	res.UnmarshalJson(&book)
 	if book.Code != "100000" {
 		return nil, fmt.Errorf("get book information error: %s", book.Tip)
 	}
@@ -36,27 +35,27 @@ func (hbooker *API) GetBookInfo(bookId string) (*hbookermodel.BookInfo, error) {
 	return &book.Data.BookInfo, nil
 }
 
-func (hbooker *API) GetUserInfo() (*hbookermodel.UserInfoData, error) {
+func (api *API) GetUserInfo() (*hbookermodel.UserInfoData, error) {
 	var m hbookermodel.UserInfo
-	if hbooker.HttpClient.LoginToken == "" || hbooker.HttpClient.Account == "" {
-		return nil, fmt.Errorf("get user info error: %s", "login token or account is empty")
-	}
-	_, err := hbooker.HttpClient.Post(urlconstants.MY_DETAILS_INFO, nil, &m)
+	res, err := api.HttpRequest.Post(urlconstants.MY_DETAILS_INFO)
 	if err != nil {
 		return nil, err
 	}
+	res.UnmarshalJson(&m)
 	if m.Code != "100000" {
 		return nil, fmt.Errorf("get user info error: %s", m.Tip)
 	}
 	return &m.Data, nil
 }
 
-func (hbooker *API) GetDivisionListByBookId(bookId string) ([]hbookermodel.VolumeList, error) {
+func (api *API) GetDivisionListByBookId(bookId string) ([]hbookermodel.VolumeList, error) {
 	var divisionList hbookermodel.NewVolumeList
-	_, err := hbooker.HttpClient.Post(urlconstants.GetDivisionListNew, map[string]string{"book_id": bookId}, &divisionList)
+	res, err := api.HttpRequest.SetFormData(map[string]string{"book_id": bookId}).Post(urlconstants.GetDivisionListNew)
+
 	if err != nil {
 		return nil, err
 	}
+	res.UnmarshalJson(&divisionList)
 	if divisionList.Code != "100000" {
 		return nil, fmt.Errorf("get division list error: %s", divisionList.Tip)
 	}
@@ -66,12 +65,13 @@ func (hbooker *API) GetDivisionListByBookId(bookId string) ([]hbookermodel.Volum
 	return divisionList.Data.ChapterList, nil
 }
 
-func (hbooker *API) GetChapterKey(chapterId string) (string, error) {
+func (api *API) GetChapterKey(chapterId string) (string, error) {
 	var m hbookermodel.ContentKey
-	_, err := hbooker.HttpClient.Post(urlconstants.GetChapterKey, map[string]string{"chapter_id": chapterId}, &m)
+	res, err := api.HttpRequest.SetFormData(map[string]string{"chapter_id": chapterId}).Post(urlconstants.GetChapterKey)
 	if err != nil {
 		return "", err
 	}
+	res.UnmarshalJson(&m)
 	if m.Code != "100000" {
 		return "", fmt.Errorf("get chapter key error: %s", m.Tip)
 	}
@@ -80,25 +80,29 @@ func (hbooker *API) GetChapterKey(chapterId string) (string, error) {
 	}
 	return m.Data.Command, nil
 }
-func (hbooker *API) GetChapterContentAPI(chapterId, chapterKey string) (*hbookermodel.ChapterInfo, error) {
+func (api *API) GetChapterContentAPI(chapterId, chapterKey string) (*hbookermodel.ChapterInfo, error) {
 	var content hbookermodel.Content
-	_, err := hbooker.HttpClient.Post(urlconstants.GetCptIfm, map[string]string{"chapter_id": chapterId, "chapter_command": chapterKey}, &content)
+	res, err := api.HttpRequest.SetFormData(map[string]string{"chapter_id": chapterId, "chapter_command": chapterKey}).Post(urlconstants.GetCptIfm)
 	if err != nil {
 		return nil, err
 	}
+	res.UnmarshalJson(&content)
 	if content.Code != "100000" {
 		return nil, fmt.Errorf("get chapter content error: %s", content.Tip)
 	}
 	if content.Data.ChapterInfo.TxtContent == "" {
 		return nil, fmt.Errorf("get chapter content error: %s", "content is empty")
-	} else {
-		content.Data.ChapterInfo.TxtContent = string(HbookerDecode(content.Data.ChapterInfo.TxtContent, chapterKey))
 	}
+	contentRaw, err := aesDecrypt(content.Data.ChapterInfo.TxtContent, chapterKey)
+	if err != nil {
+		return nil, err
+	}
+	content.Data.ChapterInfo.TxtContent = string(contentRaw)
 	return &content.Data.ChapterInfo, nil
 }
 
 // Deprecated: MySignLogin is deprecated, hbooker has joined login verification, so this method is no longer available
-func (hbooker *API) MySignLogin(username, password, validate, challenge string) (*hbookermodel.LoginData, error) {
+func (api *API) MySignLogin(username, password, validate, challenge string) (*hbookermodel.LoginData, error) {
 	var login hbookermodel.Login
 	params := map[string]string{"login_name": username, "passwd": password}
 	if validate != "" {
@@ -106,82 +110,85 @@ func (hbooker *API) MySignLogin(username, password, validate, challenge string) 
 		params["geetest_validate"] = validate
 		params["geetest_challenge"] = challenge
 	}
-	_, err := hbooker.HttpClient.Post(urlconstants.MySignLogin, params, &login)
+	res, err := api.HttpRequest.SetFormData(params).Post(urlconstants.MySignLogin)
 	if err != nil {
 		return nil, err
 	}
+	res.UnmarshalJson(&login)
 	if login.Code != "100000" {
 		return nil, fmt.Errorf("get login token error: %s", login.Tip)
 	}
 	if login.Data.LoginToken == "" {
 		return nil, fmt.Errorf("get login token error: %s", "login token is empty")
 	}
-	hbooker.HttpClient.Account = login.Data.ReaderInfo.Account
-	hbooker.HttpClient.LoginToken = login.Data.LoginToken
+
 	return &login.Data, nil
 }
 
-func (hbooker *API) GetBuyChapterAPI(chapterId, shelfId string) (*hbookermodel.ContentBuy, error) {
+func (api *API) GetBuyChapterAPI(chapterId string) (*hbookermodel.ContentBuy, error) {
 	var m hbookermodel.ContentBuy
-	_, err := hbooker.HttpClient.Post(urlconstants.ChapterBuy, map[string]string{"chapter_id": chapterId, "shelf_id": shelfId}, &m)
+	res, err := api.HttpRequest.SetFormData(map[string]string{"chapter_id": chapterId, "shelf_id": ""}).Post(urlconstants.ChapterBuy)
 	if err != nil {
 		return nil, err
 	}
+	res.UnmarshalJson(&m)
 	if m.Code != "100000" {
 		return nil, fmt.Errorf("get buy chapter error: %s", m.Tip)
 	}
 	return &m, nil
 }
 
-func (hbooker *API) GetAutoSignAPI(device string) (*hbookermodel.LoginData, error) {
+func (api *API) GetAutoSignAPI(device string) (*hbookermodel.LoginData, error) {
 	var m hbookermodel.Register
-	checkDeviceRegex := regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`)
 	if !checkDeviceRegex.MatchString(device) {
 		return nil, fmt.Errorf("get auto sign error: %s", "device is not valid")
 	}
 	params := map[string]string{"uuid": "android" + device, "gender": "1", "channel": "PCdownloadC"}
-	_, err := hbooker.HttpClient.Post(urlconstants.SIGNUP, params, &m)
+	res, err := api.HttpRequest.SetFormData(params).Post(urlconstants.SIGNUP)
 	if err != nil {
 		return nil, err
 	}
+	res.UnmarshalJson(&m)
 	if m.Code != "100000" {
 		return nil, fmt.Errorf("get auto sign error: %s", m.Tip)
 	}
-	hbooker.HttpClient.Account = m.Data.ReaderInfo.Account
-	hbooker.HttpClient.LoginToken = m.Data.LoginToken
+	//api.HttpClient.Account = m.Data.ReaderInfo.Account
 	return &m.Data, nil
 }
 
-func (hbooker *API) GetUseGeetestAPI(loginName string) (*hbookermodel.GeetestData, error) {
+func (api *API) GetUseGeetestAPI(loginName string) (*hbookermodel.GeetestData, error) {
 	var geetest hbookermodel.Geetest
-	_, err := hbooker.HttpClient.Post(urlconstants.UseGeetest, map[string]string{"login_name": loginName}, &geetest)
+	res, err := api.HttpRequest.SetFormData(map[string]string{"login_name": loginName}).Post(urlconstants.UseGeetest)
 	if err != nil {
 		return nil, err
 	}
+	res.UnmarshalJson(&geetest)
 	if geetest.Code != "100000" {
 		return nil, fmt.Errorf("get geetest error: %s", geetest.Tip)
 	}
 	return &geetest.Data, nil
 }
 
-func (hbooker *API) GetGeetestRegisterAPI(UserID string) (*hbookermodel.GeetestFirstRegisterStruct, error) {
+func (api *API) GetGeetestRegisterAPI(UserID string) (*hbookermodel.GeetestFirstRegisterStruct, error) {
 	var geetestFirstRegister hbookermodel.GeetestFirstRegisterStruct
-	_, err := hbooker.HttpClient.Post(urlconstants.GeetestRegister, map[string]string{"user_id": UserID, "t": strconv.FormatInt(time.Now().UnixNano()/1e6, 10)}, &geetestFirstRegister)
+	res, err := api.HttpRequest.SetFormData(map[string]string{"user_id": UserID, "t": strconv.FormatInt(time.Now().UnixNano()/1e6, 10)}).Post(urlconstants.GeetestRegister)
 	if err != nil {
 		return nil, err
 	}
+	res.UnmarshalJson(&geetestFirstRegister)
 	if geetestFirstRegister.Challenge == "" {
 		return nil, fmt.Errorf("get geetest register error: %s", "challenge is empty")
 	}
 	return &geetestFirstRegister, nil
 }
 
-func (hbooker *API) GetBookShelfIndexesInfoAPI(shelfId string) ([]hbookermodel.ShelfBookList, error) {
+func (api *API) GetBookShelfIndexesInfoAPI(shelfId string) ([]hbookermodel.ShelfBookList, error) {
 	var bookList hbookermodel.ShelfBook
-	_, err := hbooker.HttpClient.Post(urlconstants.BookshelfGetShelfBookList, map[string]string{"shelf_id": shelfId, "direction": "prev", "last_mod_time": "0"}, &bookList)
+	res, err := api.HttpRequest.SetFormData(map[string]string{"shelf_id": shelfId, "direction": "prev", "last_mod_time": "0"}).Post(urlconstants.BookshelfGetShelfBookList)
 	if err != nil {
 		return nil, err
 	}
+	res.UnmarshalJson(&bookList)
 	if bookList.Code != "100000" {
 		return nil, fmt.Errorf("get book shelf indexes info error: %s", bookList.Tip)
 	}
@@ -191,12 +198,13 @@ func (hbooker *API) GetBookShelfIndexesInfoAPI(shelfId string) ([]hbookermodel.S
 	return bookList.Data.BookList, nil
 }
 
-func (hbooker *API) GetBookShelfInfoAPI() ([]hbookermodel.ShelfList, error) {
+func (api *API) GetBookShelfInfoAPI() ([]hbookermodel.ShelfList, error) {
 	var shelfList hbookermodel.Shelf
-	_, err := hbooker.HttpClient.Post(urlconstants.BookshelfGetShelfList, map[string]string{}, &shelfList)
+	res, err := api.HttpRequest.Post(urlconstants.BookshelfGetShelfList)
 	if err != nil {
 		return nil, err
 	}
+	res.UnmarshalJson(&shelfList)
 	if shelfList.Code != "100000" {
 		return nil, fmt.Errorf("get book shelf info error: %s", shelfList.Tip)
 	}
@@ -206,13 +214,14 @@ func (hbooker *API) GetBookShelfInfoAPI() ([]hbookermodel.ShelfList, error) {
 	return shelfList.Data.ShelfList, nil
 }
 
-func (hbooker *API) GetSearchBooksAPI(keyword string, page any) ([]hbookermodel.BookInfo, error) {
+func (api *API) GetSearchBooksAPI(keyword string, page any) ([]hbookermodel.BookInfo, error) {
 	var search hbookermodel.Search
 	params := map[string]string{"count": "10", "page": fmt.Sprintf("%v", page), "category_index": "0", "key": keyword}
-	_, err := hbooker.HttpClient.Post(urlconstants.BookcityGetFilterList, params, &search)
+	res, err := api.HttpRequest.SetFormData(params).Post(urlconstants.BookcityGetFilterList)
 	if err != nil {
 		return nil, err
 	}
+	res.UnmarshalJson(&search)
 	if search.Code != "100000" {
 		return nil, fmt.Errorf("get search books error: %s", search.Tip)
 	}
