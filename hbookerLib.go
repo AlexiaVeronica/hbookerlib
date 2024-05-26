@@ -6,11 +6,11 @@ import (
 )
 
 const (
-	Version       = "2.9.290"
-	DeviceToken   = "ciweimao_"
-	AndroidApiKey = "zG2nSeEfSHfvTCHy5LCcqtBbQehKNLXn"
-	RetryCount    = 5
-	UserAgent     = "Android com.kuangxiangciweimao.novel "
+	version       = "2.9.290"
+	deviceToken   = "ciweimao_"
+	androidApiKey = "zG2nSeEfSHfvTCHy5LCcqtBbQehKNLXn"
+	retryCount    = 5
+	userAgent     = "Android com.kuangxiangciweimao.novel "
 )
 
 type Client struct {
@@ -35,10 +35,10 @@ func defaultConfig() *Client {
 
 	client := &Client{HttpsClient: req.NewClient()}
 	for _, option := range []Options{
-		WithVersion(Version),
-		WithRetryCount(RetryCount),
-		WithDeviceToken(DeviceToken),
-		WithAndroidApiKey(AndroidApiKey),
+		WithVersion(version),
+		WithRetryCount(retryCount),
+		WithDeviceToken(deviceToken),
+		WithAndroidApiKey(androidApiKey),
 		WithAPIBaseURL(urlconstants.WEB_SITE),
 	} {
 		option.Apply(client)
@@ -78,7 +78,7 @@ func (client *Client) API() *API {
 	})
 	httpRequest.SetHeaders(map[string]string{
 		"Content-Type": "application/x-www-form-urlencoded",
-		"User-Agent":   UserAgent + client.version,
+		"User-Agent":   userAgent + client.version,
 	})
 	return &API{HttpRequest: httpRequest}
 }
