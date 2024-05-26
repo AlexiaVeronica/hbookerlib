@@ -29,48 +29,45 @@ func WithAccount(account string) Options {
 }
 func WithVersion(version string) Options {
 	return OptionFunc(func(client *Client) {
-		client.Version = version
+		client.version = version
+	})
+}
+func WithRetryCount(retryCount int) Options {
+	return OptionFunc(func(client *Client) {
+		client.retryCount = retryCount
 	})
 }
 func WithDebug() Options {
 	return OptionFunc(func(client *Client) {
-		client.Debug = !client.Debug
+		client.debug = !client.debug
 	})
 }
 
 func WithOutputDebug() Options {
 	return OptionFunc(func(client *Client) {
-		client.OutputDebug = !client.OutputDebug
+		client.outputDebug = !client.outputDebug
 	})
 }
-func WithProxyURLArray(proxyURLArray []string) Options {
-	return OptionFunc(func(client *Client) {
-		client.ProxyURLArray = proxyURLArray
-	})
-}
+
 func WithProxyURL(proxyURL string) Options {
 	return OptionFunc(func(client *Client) {
-		client.ProxyURL = proxyURL
+		client.proxyURL = proxyURL
 	})
 }
 
 func WithAPIBaseURL(apiBaseURL string) Options {
 	return OptionFunc(func(client *Client) {
-		client.APIBaseURL = apiBaseURL
+		client.baseURL = apiBaseURL
 	})
 }
-func WithUserAgent(userAgent string) Options {
-	return OptionFunc(func(client *Client) {
-		client.UserAgent = userAgent
-	})
-}
+
 func WithAndroidApiKey(androidApiKey string) Options {
 	return OptionFunc(func(client *Client) {
-		client.AndroidApiKey = androidApiKey
+		client.androidApiKey = androidApiKey
 	})
 }
 func WithDeviceToken(deviceToken string) Options {
 	return OptionFunc(func(client *Client) {
-		client.DeviceToken = deviceToken
+		client.deviceToken = deviceToken
 	})
 }

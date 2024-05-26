@@ -110,7 +110,8 @@ func (api *API) MySignLogin(username, password, validate, challenge string) (*hb
 		params["geetest_validate"] = validate
 		params["geetest_challenge"] = challenge
 	}
-	res, err := api.HttpRequest.SetFormData(params).Post(urlconstants.MySignLogin)
+	res, err := api.DeleteValue("login_token").DeleteValue("account").
+		HttpRequest.SetFormData(params).Post(urlconstants.MySignLogin)
 	if err != nil {
 		return nil, err
 	}
@@ -143,8 +144,8 @@ func (api *API) GetAutoSignAPI(device string) (*hbookermodel.LoginData, error) {
 	if !checkDeviceRegex.MatchString(device) {
 		return nil, fmt.Errorf("get auto sign error: %s", "device is not valid")
 	}
-	params := map[string]string{"uuid": "android" + device, "gender": "1", "channel": "PCdownloadC"}
-	res, err := api.HttpRequest.SetFormData(params).Post(urlconstants.SIGNUP)
+	res, err := api.DeleteValue("login_token").DeleteValue("account").HttpRequest.
+		SetFormData(map[string]string{"uuid": "android" + device, "gender": "1", "channel": "PCdownloadC"}).Post(urlconstants.SIGNUP)
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +153,6 @@ func (api *API) GetAutoSignAPI(device string) (*hbookermodel.LoginData, error) {
 	if m.Code != "100000" {
 		return nil, fmt.Errorf("get auto sign error: %s", m.Tip)
 	}
-	//api.HttpClient.Account = m.Data.ReaderInfo.Account
 	return &m.Data, nil
 }
 

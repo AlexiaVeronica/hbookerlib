@@ -1,6 +1,7 @@
 package hbookerLib
 
 import (
+	"github.com/AlexiaVeronica/hbookerLib/urlconstants"
 	"github.com/imroc/req/v3"
 )
 
@@ -8,22 +9,21 @@ const (
 	Version       = "2.9.290"
 	DeviceToken   = "ciweimao_"
 	AndroidApiKey = "zG2nSeEfSHfvTCHy5LCcqtBbQehKNLXn"
-	APIBaseURL    = "https://app.hbooker.com/"
+	RetryCount    = 5
 	UserAgent     = "Android com.kuangxiangciweimao.novel "
 )
 
 type Client struct {
-	Version       string
-	APIBaseURL    string
-	UserAgent     string
-	AndroidApiKey string
-	DeviceToken   string
+	version       string
+	baseURL       string
+	androidApiKey string
+	deviceToken   string
 	LoginToken    string
 	Account       string
-	Debug         bool
-	OutputDebug   bool
-	ProxyURL      string
-	ProxyURLArray []string
+	debug         bool
+	retryCount    int
+	outputDebug   bool
+	proxyURL      string
 	HttpsClient   *req.Client
 }
 
@@ -32,13 +32,14 @@ type API struct {
 }
 
 func defaultConfig() *Client {
+
 	client := &Client{HttpsClient: req.NewClient()}
 	for _, option := range []Options{
 		WithVersion(Version),
+		WithRetryCount(RetryCount),
 		WithDeviceToken(DeviceToken),
 		WithAndroidApiKey(AndroidApiKey),
-		WithAPIBaseURL(APIBaseURL),
-		WithUserAgent(UserAgent),
+		WithAPIBaseURL(urlconstants.WEB_SITE),
 	} {
 		option.Apply(client)
 	}
@@ -54,24 +55,38 @@ func NewClient(options ...Options) *Client {
 }
 
 func (client *Client) API() *API {
+	if client.debug {
+		client.HttpsClient.DevMode()
+	}
+	if client.outputDebug {
+		client.HttpsClient.EnableDumpAllToFile("hbookerLib_debug.log")
+	}
+	if client.proxyURL != "" {
+		client.HttpsClient.SetProxyURL(client.proxyURL)
+	}
 	httpRequest := client.HttpsClient.
-		SetCommonRetryCount(5).
-		SetBaseURL(client.APIBaseURL).SetResponseBodyTransformer(func(rawBody []byte, _ *req.Request, _ *req.Response) ([]byte, error) {
-		return aesDecrypt(string(rawBody), client.AndroidApiKey)
+		SetCommonRetryCount(client.retryCount).
+		SetBaseURL(client.baseURL).SetResponseBodyTransformer(func(rawBody []byte, _ *req.Request, _ *req.Response) ([]byte, error) {
+		return aesDecrypt(string(rawBody), client.androidApiKey)
 	}).R()
 
 	httpRequest.SetFormData(map[string]string{
-		"app_version":  client.Version,
-		"device_token": client.DeviceToken,
+		"app_version":  client.version,
+		"device_token": client.deviceToken,
 		"login_token":  client.LoginToken,
 		"account":      client.Account,
 	})
 	httpRequest.SetHeaders(map[string]string{
 		"Content-Type": "application/x-www-form-urlencoded",
-		"User-Agent":   client.UserAgent + client.Version,
+		"User-Agent":   UserAgent + client.version,
 	})
-
 	return &API{HttpRequest: httpRequest}
+}
+func (api *API) DeleteValue(deleteValue string) *API {
+	if api.HttpRequest.FormData != nil {
+		delete(api.HttpRequest.FormData, deleteValue)
+	}
+	return api
 }
 
 //
