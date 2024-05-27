@@ -212,7 +212,7 @@ func (api *API) GetGeetestRegisterAPI(UserID string) (*hbookermodel.GeetestFirst
 	return &geetestFirstRegister, nil
 }
 
-func (api *API) GetBookShelfIndexesInfoAPI(shelfId string) ([]hbookermodel.ShelfBookList, error) {
+func (api *API) GetBookShelfIndexesInfoAPI(shelfId string) (*hbookermodel.ShelfBook, error) {
 	var bookList hbookermodel.ShelfBook
 	res, err := api.HttpRequest.SetFormData(map[string]string{"shelf_id": shelfId, "direction": "prev", "last_mod_time": "0"}).Post(urlconstants.BookshelfGetShelfBookList)
 	if err != nil {
@@ -225,7 +225,7 @@ func (api *API) GetBookShelfIndexesInfoAPI(shelfId string) ([]hbookermodel.Shelf
 	if len(bookList.Data.BookList) == 0 {
 		return nil, fmt.Errorf("get book shelf indexes info error: %s", "book list is empty")
 	}
-	return bookList.Data.BookList, nil
+	return &bookList, nil
 }
 
 func (api *API) GetBookShelfInfoAPI() ([]hbookermodel.ShelfList, error) {
@@ -244,7 +244,7 @@ func (api *API) GetBookShelfInfoAPI() ([]hbookermodel.ShelfList, error) {
 	return shelfList.Data.ShelfList, nil
 }
 
-func (api *API) GetSearchBooksAPI(keyword string, page any) ([]hbookermodel.BookInfo, error) {
+func (api *API) GetSearchBooksAPI(keyword string, page any) (*hbookermodel.Search, error) {
 	var search hbookermodel.Search
 	params := map[string]string{"count": "10", "page": fmt.Sprintf("%v", page), "category_index": "0", "key": keyword}
 	res, err := api.HttpRequest.SetFormData(params).Post(urlconstants.BookcityGetFilterList)
@@ -258,5 +258,5 @@ func (api *API) GetSearchBooksAPI(keyword string, page any) ([]hbookermodel.Book
 	if len(search.Data.BookList) == 0 {
 		return nil, fmt.Errorf("get search books error: %s", "book list is empty")
 	}
-	return search.Data.BookList, nil
+	return &search, nil
 }

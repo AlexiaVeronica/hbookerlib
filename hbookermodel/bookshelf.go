@@ -33,3 +33,18 @@ type ShelfBook struct {
 	} `json:"data"`
 	ScrollChests []interface{} `json:"scroll_chests"`
 }
+
+func (shelfBook *ShelfBook) EachBook(f func(int, BookInfo)) {
+	if shelfBook.Data.BookList != nil {
+		for i, book := range shelfBook.Data.BookList {
+			f(i, book.BookInfo)
+		}
+	}
+
+}
+func (shelfBook *ShelfBook) GetBook(index int) *BookInfo {
+	if shelfBook.Data.BookList != nil && index < len(shelfBook.Data.BookList) {
+		return &shelfBook.Data.BookList[index].BookInfo
+	}
+	return nil
+}
