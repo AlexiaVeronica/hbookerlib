@@ -4,11 +4,47 @@ import (
 	"fmt"
 	"github.com/AlexiaVeronica/hbookerLib/hbookermodel"
 	"github.com/AlexiaVeronica/hbookerLib/urlconstants"
+	"github.com/imroc/req/v3"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 )
+
+func (client *Client) API() *API {
+	if client.debug {
+		client.HttpsClient.DevMode()
+	}
+	if client.outputDebug {
+		client.HttpsClient.EnableDumpAllToFile("hbookerLib_debug.log")
+	}
+	if client.proxyURL != "" {
+		client.HttpsClient.SetProxyURL(client.proxyURL)
+	}
+	httpRequest := client.HttpsClient.
+		SetCommonRetryCount(client.retryCount).
+		SetBaseURL(client.baseURL).SetResponseBodyTransformer(func(rawBody []byte, _ *req.Request, _ *req.Response) ([]byte, error) {
+		return aesDecrypt(string(rawBody), client.androidApiKey)
+	}).R()
+
+	httpRequest.SetFormData(map[string]string{
+		"app_version":  client.version,
+		"device_token": client.deviceToken,
+		"login_token":  client.LoginToken,
+		"account":      client.Account,
+	})
+	httpRequest.SetHeaders(map[string]string{
+		"Content-Type": "application/x-www-form-urlencoded",
+		"User-Agent":   userAgent + client.version,
+	})
+	return &API{HttpRequest: httpRequest}
+}
+func (api *API) DeleteValue(deleteValue string) *API {
+	if api.HttpRequest.FormData != nil {
+		delete(api.HttpRequest.FormData, deleteValue)
+	}
+	return api
+}
 
 var checkDeviceRegex = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`)
 
