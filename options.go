@@ -1,7 +1,10 @@
 package hbookerLib
 
 import (
-	"log"
+	"fmt"
+	"regexp"
+	"strconv"
+	"strings"
 )
 
 type Options interface {
@@ -15,26 +18,35 @@ func (f OptionFunc) Apply(client *Client) {
 
 func WithLoginToken(loginToken string) Options {
 	return OptionFunc(func(client *Client) {
-		if len(loginToken) != 32 {
-			log.Println("LoginToken is must be 32 length, please check it.")
-		} else {
+		if len(loginToken) == 32 {
 			client.LoginToken = loginToken
 		}
 	})
 }
 func WithAccount(account string) Options {
 	return OptionFunc(func(client *Client) {
-		client.Account = account
+		if unquoted, err := strconv.Unquote(fmt.Sprintf(`"%s"`, account)); err == nil {
+			account = unquoted
+		}
+		// Check if the (possibly decoded) string contains "书客".
+		if strings.Contains(account, "书客") {
+			client.Account = account
+		}
 	})
 }
 func WithVersion(version string) Options {
 	return OptionFunc(func(client *Client) {
-		client.version = version
+		// Regular expression to match semantic versioning (e.g., 1.0.0, 2.9.290)
+		if regexp.MustCompile(`^\d+\.\d+\.\d+$`).MatchString(version) {
+			client.version = version
+		}
 	})
 }
 func WithRetryCount(retryCount int) Options {
 	return OptionFunc(func(client *Client) {
-		client.retryCount = retryCount
+		if retryCount > 0 {
+			client.retryCount = retryCount
+		}
 	})
 }
 func WithDebug() Options {
@@ -51,13 +63,17 @@ func WithOutputDebug() Options {
 
 func WithProxyURL(proxyURL string) Options {
 	return OptionFunc(func(client *Client) {
-		client.proxyURL = proxyURL
+		if regexp.MustCompile(`^http[s]?://[a-zA-Z0-9.-]+(:\d+)?$`).MatchString(proxyURL) {
+			client.proxyURL = proxyURL
+		}
 	})
 }
 
 func WithAPIBaseURL(apiBaseURL string) Options {
 	return OptionFunc(func(client *Client) {
-		client.baseURL = apiBaseURL
+		if regexp.MustCompile(`^https?://[a-zA-Z0-9.-]+(:\d+)?(/.*)?$`).MatchString(apiBaseURL) {
+			client.baseURL = apiBaseURL
+		}
 	})
 }
 

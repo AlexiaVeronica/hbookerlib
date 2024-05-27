@@ -6,10 +6,10 @@ import (
 )
 
 const (
+	retryCount      = 5
 	version         = "2.9.290"
 	deviceToken     = "ciweimao_"
 	androidApiKey   = "zG2nSeEfSHfvTCHy5LCcqtBbQehKNLXn"
-	retryCount      = 5
 	userAgent       = "Android com.kuangxiangciweimao.novel "
 	postContentType = "application/x-www-form-urlencoded"
 )
