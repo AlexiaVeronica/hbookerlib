@@ -11,9 +11,6 @@ type APP struct {
 	client    *Client
 }
 
-type continueFunction func(chapter hbookermodel.ChapterList) bool
-type contentFunction func(chapter hbookermodel.ChapterList, content string)
-
 func (client *Client) APP() *APP {
 	return &APP{client: client, threadNum: 32}
 }

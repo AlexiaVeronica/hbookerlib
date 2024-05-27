@@ -7,8 +7,6 @@ import (
 	"encoding/base64"
 )
 
-var iv = []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-
 // SHA256 sha256 编码
 func enSha256(data string) []byte {
 	ret := sha256.Sum256([]byte(data))

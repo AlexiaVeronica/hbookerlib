@@ -5,14 +5,6 @@ import (
 	"github.com/imroc/req/v3"
 )
 
-const (
-	version       = "2.9.290"
-	deviceToken   = "ciweimao_"
-	androidApiKey = "zG2nSeEfSHfvTCHy5LCcqtBbQehKNLXn"
-	retryCount    = 5
-	userAgent     = "Android com.kuangxiangciweimao.novel "
-)
-
 type Client struct {
 	version       string
 	baseURL       string
@@ -44,6 +36,7 @@ func defaultConfig() *Client {
 	}
 	return client
 }
+
 func NewClient(options ...Options) *Client {
 	client := defaultConfig()
 	for _, option := range options {

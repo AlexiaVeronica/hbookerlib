@@ -5,7 +5,6 @@ import (
 	"github.com/AlexiaVeronica/hbookerLib/hbookermodel"
 	"github.com/AlexiaVeronica/hbookerLib/urlconstants"
 	"github.com/imroc/req/v3"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -33,10 +32,8 @@ func (client *Client) API() *API {
 		"login_token":  client.LoginToken,
 		"account":      client.Account,
 	})
-	httpRequest.SetHeaders(map[string]string{
-		"Content-Type": "application/x-www-form-urlencoded",
-		"User-Agent":   userAgent + client.version,
-	})
+	httpRequest.SetHeaders(map[string]string{"Content-Type": postContentType, "User-Agent": userAgent + client.version})
+
 	return &API{HttpRequest: httpRequest}
 }
 func (api *API) DeleteValue(deleteValue string) *API {
@@ -45,9 +42,6 @@ func (api *API) DeleteValue(deleteValue string) *API {
 	}
 	return api
 }
-
-var checkDeviceRegex = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`)
-
 func (api *API) GetBookInfo(bookId string) (*hbookermodel.BookInfo, error) {
 	var book hbookermodel.Detail
 	res, err := api.HttpRequest.SetFormData(map[string]string{"book_id": bookId}).Post(urlconstants.BookGetInfoById)
