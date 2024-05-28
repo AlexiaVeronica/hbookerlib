@@ -212,9 +212,10 @@ func (api *API) GetGeetestRegisterAPI(UserID string) (*hbookermodel.GeetestFirst
 	return &geetestFirstRegister, nil
 }
 
-func (api *API) GetBookShelfIndexesInfoAPI(shelfId string) (*hbookermodel.ShelfBook, error) {
-	var bookList hbookermodel.ShelfBook
-	res, err := api.HttpRequest.SetFormData(map[string]string{"shelf_id": shelfId, "direction": "prev", "last_mod_time": "0"}).Post(urlconstants.BookshelfGetShelfBookList)
+func (api *API) GetBookcaseAPI(shelfId string) (*hbookermodel.Bookcase, error) {
+	var bookList hbookermodel.Bookcase
+	params := map[string]string{"shelf_id": shelfId, "direction": "prev", "last_mod_time": "0"}
+	res, err := api.HttpRequest.SetFormData(params).Post(urlconstants.BookshelfGetShelfBookList)
 	if err != nil {
 		return nil, err
 	}
@@ -228,20 +229,20 @@ func (api *API) GetBookShelfIndexesInfoAPI(shelfId string) (*hbookermodel.ShelfB
 	return &bookList, nil
 }
 
-func (api *API) GetBookShelfInfoAPI() ([]hbookermodel.ShelfList, error) {
-	var shelfList hbookermodel.Shelf
+func (api *API) GetBookShelfInfoAPI() (*hbookermodel.Bookshelf, error) {
+	var bookshelf hbookermodel.Bookshelf
 	res, err := api.HttpRequest.Post(urlconstants.BookshelfGetShelfList)
 	if err != nil {
 		return nil, err
 	}
-	res.UnmarshalJson(&shelfList)
-	if shelfList.Code != "100000" {
-		return nil, fmt.Errorf("get book shelf info error: %s", shelfList.Tip)
+	res.UnmarshalJson(&bookshelf)
+	if bookshelf.Code != "100000" {
+		return nil, fmt.Errorf("get book shelf info error: %s", bookshelf.Tip)
 	}
-	if len(shelfList.Data.ShelfList) == 0 {
+	if len(bookshelf.Data.ShelfList) == 0 {
 		return nil, fmt.Errorf("get book shelf info error: %s", "shelf list is empty")
 	}
-	return shelfList.Data.ShelfList, nil
+	return &bookshelf, nil
 }
 
 func (api *API) GetSearchBooksAPI(keyword string, page any) (*hbookermodel.Search, error) {

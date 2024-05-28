@@ -3,6 +3,7 @@ package hbookerLib
 import (
 	"fmt"
 	"github.com/AlexiaVeronica/hbookerLib/hbookermodel"
+	"github.com/AlexiaVeronica/input"
 	"sync"
 )
 
@@ -73,7 +74,7 @@ func (app *APP) Search(keyword string, f1 continueFunction, f2 contentFunction) 
 	searchInfo.EachBook(func(index int, book hbookermodel.BookInfo) {
 		fmt.Println("Index:", index, "\t\t\tBookName:", book.BookName)
 	})
-	bookInfo := searchInfo.GetBook(GetUserInput("Please input the index of the book you want to download"))
+	bookInfo := searchInfo.GetBook(input.IntInput("Please input the index of the book you want to download"))
 	app.Download(bookInfo.BookID, f1, f2)
 }
 
@@ -83,11 +84,12 @@ func (app *APP) Bookshelf(f1 continueFunction, f2 contentFunction) {
 		fmt.Println("get bookshelf error:", err)
 		return
 	}
-	for index, book := range shelf {
+	for index, book := range shelf.Data.ShelfList {
 		fmt.Println("Index:", index, "\t\t\tShelfName:", book.ShelfName, "\t\t\tShelfNum:", book.BookLimit)
 
 	}
-	bookshelf, err := app.client.API().GetBookShelfIndexesInfoAPI(shelf[GetUserInput("Please input the index of the bookshelf you want to download")].ShelfID)
+	bookshelfId := shelf.Data.ShelfList[input.IntInput("input the index of the bookshelf")].ShelfID
+	bookshelf, err := app.client.API().GetBookcaseAPI(bookshelfId)
 	if err != nil {
 		fmt.Println("get bookshelf error:", err)
 		return
@@ -95,7 +97,7 @@ func (app *APP) Bookshelf(f1 continueFunction, f2 contentFunction) {
 	bookshelf.EachBook(func(index int, book hbookermodel.BookInfo) {
 		fmt.Println("Index:", index, "\t\t\tBookName:", book.BookName)
 	})
-	bookInfo := bookshelf.GetBook(GetUserInput("Please input the index of the book you want to download"))
+	bookInfo := bookshelf.GetBook(input.IntInput("Please input the index of the book you want to download"))
 	app.Download(bookInfo.BookID, f1, f2)
 
 }

@@ -7,7 +7,7 @@ type ShelfList struct {
 	ShelfIndex string `json:"shelf_index"`
 	BookLimit  string `json:"book_limit"`
 }
-type Shelf struct {
+type Bookshelf struct {
 	Code string `json:"code"`
 	Tip  any    `json:"tip"`
 	Data struct {
@@ -25,7 +25,7 @@ type ShelfBookList struct {
 	IsNotify                  string   `json:"is_notify"`
 }
 
-type ShelfBook struct {
+type Bookcase struct {
 	Code string `json:"code"`
 	Tip  any    `json:"tip"`
 	Data struct {
@@ -34,7 +34,7 @@ type ShelfBook struct {
 	ScrollChests []interface{} `json:"scroll_chests"`
 }
 
-func (shelfBook *ShelfBook) EachBook(f func(int, BookInfo)) {
+func (shelfBook *Bookcase) EachBook(f func(int, BookInfo)) {
 	if shelfBook.Data.BookList != nil {
 		for i, book := range shelfBook.Data.BookList {
 			f(i, book.BookInfo)
@@ -42,7 +42,7 @@ func (shelfBook *ShelfBook) EachBook(f func(int, BookInfo)) {
 	}
 
 }
-func (shelfBook *ShelfBook) GetBook(index int) *BookInfo {
+func (shelfBook *Bookcase) GetBook(index int) *BookInfo {
 	if shelfBook.Data.BookList != nil && index < len(shelfBook.Data.BookList) {
 		return &shelfBook.Data.BookList[index].BookInfo
 	}
