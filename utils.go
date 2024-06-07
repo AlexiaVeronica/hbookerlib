@@ -11,6 +11,7 @@ const (
 	androidApiKey   = "zG2nSeEfSHfvTCHy5LCcqtBbQehKNLXn"
 	userAgent       = "Android com.kuangxiangciweimao.novel "
 	postContentType = "application/x-www-form-urlencoded"
+	ivBase64        = "AAAAAAAAAAAAAAAAAAAAAA=="
 )
 
 var iv = []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}

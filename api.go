@@ -24,12 +24,13 @@ func handleResponse[T any](res *req.Response, err error, data *T) (*T, error) {
 	v, ok := any(data).(interface {
 		GetCode() string
 		GetTip() string
+		IsSuccess() bool
 	})
 	if !ok {
 		return nil, fmt.Errorf("response does not implement required methods")
 	}
 
-	if v.GetCode() != "100000" {
+	if !v.IsSuccess() {
 		return nil, fmt.Errorf("error: %s", v.GetTip())
 	}
 
