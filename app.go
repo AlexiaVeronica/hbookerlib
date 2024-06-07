@@ -25,7 +25,7 @@ func (app *APP) DownloadByChapterId(chapterId string) (*hbookermodel.ChapterInfo
 	if err != nil {
 		return nil, err
 	}
-	return app.client.API().GetChapterContentAPI(chapterId, key)
+	return app.client.API().GetChapterContentAPI(chapterId, key.Data.Command)
 }
 
 func (app *APP) EachChapter(bookId string, f func(hbookermodel.ChapterList)) {
@@ -34,7 +34,7 @@ func (app *APP) EachChapter(bookId string, f func(hbookermodel.ChapterList)) {
 		fmt.Println("get division list error:", err)
 		return
 	}
-	for _, division := range divisionList {
+	for _, division := range divisionList.Data.ChapterList {
 		for _, chapter := range division.ChapterList {
 			f(chapter)
 		}

@@ -8,8 +8,7 @@ type ShelfList struct {
 	BookLimit  string `json:"book_limit"`
 }
 type Bookshelf struct {
-	Code string `json:"code"`
-	Tip  any    `json:"tip"`
+	Tip
 	Data struct {
 		ShelfList []ShelfList `json:"shelf_list"`
 	} `json:"data"`
@@ -26,8 +25,7 @@ type ShelfBookList struct {
 }
 
 type Bookcase struct {
-	Code string `json:"code"`
-	Tip  any    `json:"tip"`
+	Tip
 	Data struct {
 		BookList []ShelfBookList `json:"book_list"`
 	} `json:"data"`

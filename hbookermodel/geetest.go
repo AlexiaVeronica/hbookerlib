@@ -1,8 +1,7 @@
 package hbookermodel
 
 type Geetest struct {
-	Code string      `json:"code"`
-	Tip  string      `json:"tip"`
+	Tip
 	Data GeetestData `json:"data"`
 }
 

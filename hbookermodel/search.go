@@ -1,9 +1,8 @@
 package hbookermodel
 
 type Search struct {
-	Code string      `json:"code"`
-	Data SearchData  `json:"data"`
-	Tip  interface{} `json:"tip"`
+	Tip
+	Data SearchData `json:"data"`
 }
 
 type SearchData struct {

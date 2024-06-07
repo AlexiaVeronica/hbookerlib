@@ -1,9 +1,8 @@
 package hbookermodel
 
 type Login struct {
-	Code string      `json:"code"`
-	Data LoginData   `json:"data"`
-	Tip  interface{} `json:"tip"`
+	Tip
+	Data LoginData `json:"data"`
 }
 
 type LoginData struct {

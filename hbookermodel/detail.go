@@ -1,8 +1,7 @@
 package hbookermodel
 
 type Detail struct {
-	Code string `json:"code" bson:"code"`
-	Tip  any    `json:"tip" bson:"tip"`
+	Tip
 	Data struct {
 		BookInfo    BookInfo   `json:"book_info" bson:"book_info"`
 		RelatedList []BookInfo `json:"related_list" bson:"related_list"`

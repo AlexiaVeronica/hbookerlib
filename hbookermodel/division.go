@@ -1,15 +1,15 @@
 package hbookermodel
 
-type NewVolumeList struct {
-	Code string      `json:"code" bson:"code"`
-	Tip  interface{} `json:"tip" bson:"tip"`
-	Data struct {
-		ChapterList []VolumeList `json:"chapter_list" bson:"chapter_list"`
-	} `json:"data" bson:"data"`
+type NewDivisionModel struct {
+	Tip
+	Data         DivisionData  `json:"data" bson:"data"`
 	ScrollChests []interface{} `json:"scroll_chests" bson:"scroll_chests"`
 }
+type DivisionData struct {
+	ChapterList []DivisionList `json:"chapter_list" bson:"chapter_list"`
+}
 
-type VolumeList struct {
+type DivisionList struct {
 	ChapterList     []ChapterList `json:"chapter_list" bson:"chapter_list"`
 	MaxUpdateTime   string        `json:"max_update_time" bson:"max_update_time"`
 	MaxChapterIndex string        `json:"max_chapter_index" bson:"max_chapter_index"`

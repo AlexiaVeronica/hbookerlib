@@ -1,8 +1,7 @@
 package hbookermodel
 
 type UserInfo struct {
-	Code string       `json:"code"`
-	Tip  interface{}  `json:"tip"`
+	Tip
 	Data UserInfoData `json:"data"`
 }
 

@@ -1,16 +1,14 @@
 package hbookermodel
 
 type Content struct {
-	Code string      `json:"code" bson:"code"`
-	Tip  interface{} `json:"tip" bson:"tip"`
+	Tip
 	Data struct {
 		ChapterInfo ChapterInfo `json:"chapter_info" bson:"chapter_info"`
 	} `json:"data" bson:"data"`
 }
 
 type ContentKey struct {
-	Code string      `json:"code" bson:"code"`
-	Tip  interface{} `json:"tip" bson:"tip"`
+	Tip
 	Data struct {
 		Command string `json:"command" bson:"command"`
 	} `json:"data" bson:"data"`
@@ -49,8 +47,7 @@ type ContentBuyData struct {
 }
 
 type ContentBuy struct {
-	Code         string         `json:"code" bson:"code"`
-	Tip          string         `json:"tip" bson:"tip"`
+	Tip
 	Data         ContentBuyData `json:"data" bson:"data"`
 	ScrollChests ScrollChest    `json:"scroll_chests" bson:"scroll_chests"`
 }
