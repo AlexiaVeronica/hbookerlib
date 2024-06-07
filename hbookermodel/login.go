@@ -14,7 +14,6 @@ type LoginData struct {
 }
 
 type Register struct {
-	Code string      `json:"code"`
-	Tip  interface{} `json:"tip"`
-	Data LoginData   `json:"data"`
+	Tip
+	Data LoginData `json:"data"`
 }

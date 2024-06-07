@@ -124,9 +124,6 @@ func (api *API) GetBuyChapterAPI(chapterId string) (*hbookermodel.ContentBuy, er
 }
 
 func (api *API) GetAutoSignAPI(device string) (*hbookermodel.Register, error) {
-	if !checkDeviceRegex.MatchString(device) {
-		return nil, fmt.Errorf("get auto sign error: %s", "device is not valid")
-	}
 	res, err := api.DeleteValue("login_token").DeleteValue("account").HttpRequest.
 		SetFormData(map[string]string{"uuid": "android" + device, "gender": "1", "channel": "PCdownloadC"}).Post(urlconstants.SIGNUP)
 	return handleResponse(res, err, &hbookermodel.Register{})

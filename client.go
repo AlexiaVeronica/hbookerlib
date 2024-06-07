@@ -45,3 +45,8 @@ func NewClient(options ...Options) *Client {
 
 	return client
 }
+func (client *Client) SetToken(account, loginToken string) *Client {
+	WithLoginToken(loginToken).Apply(client)
+	WithAccount(account).Apply(client)
+	return client
+}
