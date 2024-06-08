@@ -100,7 +100,7 @@ const (
 	GET_DECORATION                      = "reader/get_decoration_list_by_type"
 	GET_DETAIL_BOOKLISTS                = "bookcity/get_book_correlation_lists"
 	GET_DIVISION_LIST                   = "book/get_division_list"
-	GetDivisionListNew                  = "chapter/get_updated_chapter_by_division_new"
+	GetUpdatedChapterByDivisionNew      = "chapter/get_updated_chapter_by_division_new"
 	GET_DOWNURL                         = "setting/get_resource_download_url"
 	GET_FANSVALUES                      = "book/get_book_fans_value"
 	GET_FAVOR_BOOKLIST                  = "booklist/get_favor_booklist"

@@ -90,8 +90,9 @@ func (api *API) GetUserInfo() (*hbookermodel.UserInfo, error) {
 	return newRequest[hbookermodel.UserInfo](api.HttpRequest).handleResponse(urlconstants.MY_DETAILS_INFO, nil)
 }
 
-func (api *API) GetDivisionListByBookId(bookId string) (*hbookermodel.NewDivisionModel, error) {
-	return newRequest[hbookermodel.NewDivisionModel](api.HttpRequest).handleResponse(urlconstants.GetDivisionListNew, map[string]string{"book_id": bookId})
+func (api *API) GetDivisionListByBookId(bookId string) (*hbookermodel.Division, error) {
+	data := map[string]string{"book_id": bookId}
+	return newRequest[hbookermodel.Division](api.HttpRequest).handleResponse(urlconstants.GetUpdatedChapterByDivisionNew, data)
 }
 
 func (api *API) GetChapterKey(chapterId string) (*hbookermodel.ContentKey, error) {

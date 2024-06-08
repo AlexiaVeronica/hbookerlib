@@ -1,6 +1,6 @@
 package hbookermodel
 
-type NewDivisionModel struct {
+type Division struct {
 	Tip
 	Data         DivisionData  `json:"data" bson:"data"`
 	ScrollChests []interface{} `json:"scroll_chests" bson:"scroll_chests"`
