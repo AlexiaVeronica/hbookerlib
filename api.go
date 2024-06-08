@@ -9,13 +9,18 @@ import (
 	"time"
 )
 
-// 泛型函数，用于处理响应的解码和错误检查
-func handleResponse[T any](res *req.Response, err error, data *T) (*T, error) {
+type Request[T any] struct {
+	HttpRequest *req.Request
+}
+
+func (request *Request[T]) handleResponse(url string, formData map[string]string) (*T, error) {
+	res, err := request.HttpRequest.SetFormData(formData).Post(url)
 	if err != nil {
 		return nil, err
 	} else if res == nil {
 		return nil, fmt.Errorf("response is nil")
 	}
+	data := new(T)
 	if err = res.UnmarshalJson(data); err != nil {
 		return nil, err
 	}
@@ -35,6 +40,13 @@ func handleResponse[T any](res *req.Response, err error, data *T) (*T, error) {
 	}
 
 	return data, nil
+}
+func newRequest[T any](HttpRequest *req.Request) *Request[T] {
+	return &Request[T]{HttpRequest: HttpRequest}
+}
+
+func (api *API) GetBookInfo(bookId string) (*hbookermodel.Detail, error) {
+	return newRequest[hbookermodel.Detail](api.HttpRequest).handleResponse(urlconstants.BookGetInfoById, map[string]string{"book_id": bookId})
 }
 
 func (client *Client) API() *API {
@@ -60,7 +72,6 @@ func (client *Client) API() *API {
 		"account":      client.Account,
 	})
 	httpRequest.SetHeaders(map[string]string{"Content-Type": postContentType, "User-Agent": userAgent + client.version})
-
 	return &API{HttpRequest: httpRequest}
 }
 
@@ -70,88 +81,72 @@ func (api *API) DeleteValue(deleteValue string) *API {
 	}
 	return api
 }
-
-func (api *API) GetBookInfo(bookId string) (*hbookermodel.Detail, error) {
-	res, err := api.HttpRequest.SetFormData(map[string]string{"book_id": bookId}).Post(urlconstants.BookGetInfoById)
-	return handleResponse(res, err, &hbookermodel.Detail{})
-}
-
 func (api *API) GetUserInfo() (*hbookermodel.UserInfo, error) {
-	res, err := api.HttpRequest.Post(urlconstants.MY_DETAILS_INFO)
-	return handleResponse(res, err, &hbookermodel.UserInfo{})
+	return newRequest[hbookermodel.UserInfo](api.HttpRequest).handleResponse(urlconstants.MY_DETAILS_INFO, nil)
 }
 
 func (api *API) GetDivisionListByBookId(bookId string) (*hbookermodel.NewDivisionModel, error) {
-	res, err := api.HttpRequest.SetFormData(map[string]string{"book_id": bookId}).Post(urlconstants.GetDivisionListNew)
-	return handleResponse(res, err, &hbookermodel.NewDivisionModel{})
+	return newRequest[hbookermodel.NewDivisionModel](api.HttpRequest).handleResponse(urlconstants.GetDivisionListNew, map[string]string{"book_id": bookId})
 }
 
 func (api *API) GetChapterKey(chapterId string) (*hbookermodel.ContentKey, error) {
-	res, err := api.HttpRequest.SetFormData(map[string]string{"chapter_id": chapterId}).Post(urlconstants.GetChapterKey)
-	return handleResponse(res, err, &hbookermodel.ContentKey{})
+	return newRequest[hbookermodel.ContentKey](api.HttpRequest).handleResponse(urlconstants.GetChapterKey, map[string]string{"chapter_id": chapterId})
 }
 
 func (api *API) GetChapterContentAPI(chapterId, chapterKey string) (*hbookermodel.ChapterInfo, error) {
-	res, err := api.HttpRequest.SetFormData(map[string]string{"chapter_id": chapterId, "chapter_command": chapterKey}).Post(urlconstants.GetCptIfm)
-	content, ok := handleResponse(res, err, &hbookermodel.Content{})
+	data := map[string]string{"chapter_id": chapterId, "chapter_command": chapterKey}
+	content, ok := newRequest[hbookermodel.Content](api.HttpRequest).handleResponse(urlconstants.GetCptIfm, data)
 	if ok != nil {
 		return nil, ok
 	}
 	contentRaw, err := aesDecrypt(content.Data.ChapterInfo.TxtContent, chapterKey)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("aesDecrypt error: %v", err)
 	}
 	content.Data.ChapterInfo.TxtContent = string(contentRaw)
 	return &content.Data.ChapterInfo, nil
-
 }
 
 // Deprecated: MySignLogin is deprecated, hbooker has joined login verification, so this method is no longer available
 func (api *API) MySignLogin(username, password, validate, challenge string) (*hbookermodel.Login, error) {
-	params := map[string]string{"login_name": username, "passwd": password}
+	data := map[string]string{"login_name": username, "passwd": password}
 	if validate != "" {
-		params["geetest_seccode"] = validate + "|jordan"
-		params["geetest_validate"] = validate
-		params["geetest_challenge"] = challenge
+		data["geetest_seccode"] = validate + "|jordan"
+		data["geetest_validate"] = validate
+		data["geetest_challenge"] = challenge
 	}
-	res, err := api.DeleteValue("login_token").DeleteValue("account").
-		HttpRequest.SetFormData(params).Post(urlconstants.MySignLogin)
-	return handleResponse(res, err, &hbookermodel.Login{})
+	return newRequest[hbookermodel.Login](api.HttpRequest).handleResponse(urlconstants.MySignLogin, data)
 }
 
 func (api *API) GetBuyChapterAPI(chapterId string) (*hbookermodel.ContentBuy, error) {
-	res, err := api.HttpRequest.SetFormData(map[string]string{"chapter_id": chapterId, "shelf_id": ""}).Post(urlconstants.ChapterBuy)
-	return handleResponse(res, err, &hbookermodel.ContentBuy{})
+	data := map[string]string{"chapter_id": chapterId, "shelf_id": ""}
+	return newRequest[hbookermodel.ContentBuy](api.HttpRequest).handleResponse(urlconstants.ChapterBuy, data)
 }
 
 func (api *API) GetAutoSignAPI(device string) (*hbookermodel.Register, error) {
-	res, err := api.DeleteValue("login_token").DeleteValue("account").HttpRequest.
-		SetFormData(map[string]string{"uuid": "android" + device, "gender": "1", "channel": "PCdownloadC"}).Post(urlconstants.SIGNUP)
-	return handleResponse(res, err, &hbookermodel.Register{})
+	data := map[string]string{"uuid": "android" + device, "gender": "1", "channel": "PCdownloadC"}
+	return newRequest[hbookermodel.Register](api.HttpRequest).handleResponse(urlconstants.SIGNUP, data)
 }
 
 func (api *API) GetUseGeetestAPI(loginName string) (*hbookermodel.Geetest, error) {
-	res, err := api.HttpRequest.SetFormData(map[string]string{"login_name": loginName}).Post(urlconstants.UseGeetest)
-	return handleResponse(res, err, &hbookermodel.Geetest{})
+	return newRequest[hbookermodel.Geetest](api.HttpRequest).handleResponse(urlconstants.UseGeetest, map[string]string{"login_name": loginName})
 }
 
 func (api *API) GetGeetestRegisterAPI(UserID string) (*hbookermodel.GeetestFirstRegisterStruct, error) {
-	res, err := api.HttpRequest.SetFormData(map[string]string{"user_id": UserID, "t": strconv.FormatInt(time.Now().UnixNano()/1e6, 10)}).Post(urlconstants.GeetestRegister)
-	return handleResponse(res, err, &hbookermodel.GeetestFirstRegisterStruct{})
+	data := map[string]string{"user_id": UserID, "t": strconv.FormatInt(time.Now().UnixNano()/1e6, 10)}
+	return newRequest[hbookermodel.GeetestFirstRegisterStruct](api.HttpRequest).handleResponse(urlconstants.GeetestRegister, data)
 }
 
 func (api *API) GetBookcaseAPI(shelfId string) (*hbookermodel.Bookcase, error) {
-	res, err := api.HttpRequest.SetFormData(map[string]string{"shelf_id": shelfId, "direction": "prev", "last_mod_time": "0"}).Post(urlconstants.BookshelfGetShelfBookList)
-	return handleResponse(res, err, &hbookermodel.Bookcase{})
+	data := map[string]string{"shelf_id": shelfId, "direction": "prev", "last_mod_time": "0"}
+	return newRequest[hbookermodel.Bookcase](api.HttpRequest).handleResponse(urlconstants.BookshelfGetShelfBookList, data)
 }
 
 func (api *API) GetBookShelfInfoAPI() (*hbookermodel.Bookshelf, error) {
-	res, err := api.HttpRequest.Post(urlconstants.BookshelfGetShelfList)
-	return handleResponse(res, err, &hbookermodel.Bookshelf{})
+	return newRequest[hbookermodel.Bookshelf](api.HttpRequest).handleResponse(urlconstants.BookshelfGetShelfList, nil)
 }
 
 func (api *API) GetSearchBooksAPI(keyword string, page any) (*hbookermodel.Search, error) {
-	res, err := api.HttpRequest.SetFormData(map[string]string{"count": "10", "page": fmt.Sprintf("%v", page), "category_index": "0", "key": keyword}).
-		Post(urlconstants.BookcityGetFilterList)
-	return handleResponse(res, err, &hbookermodel.Search{})
+	data := map[string]string{"count": "10", "page": fmt.Sprintf("%v", page), "category_index": "0", "key": keyword}
+	return newRequest[hbookermodel.Search](api.HttpRequest).handleResponse(urlconstants.BookcityGetFilterList, data)
 }
