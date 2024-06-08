@@ -22,6 +22,11 @@ func aesDecrypt(contentText string, encryptKey string) ([]byte, error) {
 	if ok != nil {
 		return nil, ok
 	}
+
+	iv, err := base64.StdEncoding.DecodeString(ivBase64)
+	if err != nil {
+		return nil, err
+	}
 	blockModel, plainText := cipher.NewCBCDecrypter(block, iv), make([]byte, len(decoded))
 	blockModel.CryptBlocks(plainText, decoded)
 	return plainText[:(len(plainText) - int(plainText[len(plainText)-1]))], nil

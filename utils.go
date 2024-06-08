@@ -14,8 +14,6 @@ const (
 	ivBase64        = "AAAAAAAAAAAAAAAAAAAAAA=="
 )
 
-var iv = []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-
 type continueFunction func(chapter hbookermodel.ChapterList) bool
 type contentFunction func(chapter *hbookermodel.ChapterInfo)
 
