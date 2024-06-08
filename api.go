@@ -17,30 +17,29 @@ func (request *Request[T]) handleResponse(url string, formData map[string]string
 	res, err := request.HttpRequest.SetFormData(formData).Post(url)
 	if err != nil {
 		return nil, err
-	} else if res == nil {
+	}
+	if res == nil {
 		return nil, fmt.Errorf("response is nil")
 	}
+
 	data := new(T)
 	if err = res.UnmarshalJson(data); err != nil {
 		return nil, err
 	}
 
-	// 使用类型断言访问 Code 和 Tip 字段
-	v, ok := any(data).(interface {
+	if response, ok := any(data).(interface {
 		GetCode() string
 		GetTip() string
 		IsSuccess() bool
-	})
-	if !ok {
+	}); ok && !response.IsSuccess() {
+		return nil, fmt.Errorf("error: %s", response.GetTip())
+	} else if !ok {
 		return nil, fmt.Errorf("response does not implement required methods")
-	}
-
-	if !v.IsSuccess() {
-		return nil, fmt.Errorf("error: %s", v.GetTip())
 	}
 
 	return data, nil
 }
+
 func newRequest[T any](HttpRequest *req.Request) *Request[T] {
 	return &Request[T]{HttpRequest: HttpRequest}
 }
@@ -59,19 +58,24 @@ func (client *Client) API() *API {
 	if client.proxyURL != "" {
 		client.HttpsClient.SetProxyURL(client.proxyURL)
 	}
+
 	httpRequest := client.HttpsClient.
 		SetCommonRetryCount(client.retryCount).
-		SetBaseURL(client.baseURL).SetResponseBodyTransformer(func(rawBody []byte, _ *req.Request, _ *req.Response) ([]byte, error) {
-		return aesDecrypt(string(rawBody), client.androidApiKey)
-	}).R()
+		SetBaseURL(client.baseURL).
+		SetResponseBodyTransformer(func(rawBody []byte, _ *req.Request, _ *req.Response) ([]byte, error) {
+			return aesDecrypt(string(rawBody), client.androidApiKey)
+		}).R()
 
 	httpRequest.SetFormData(map[string]string{
 		"app_version":  client.version,
 		"device_token": client.deviceToken,
 		"login_token":  client.LoginToken,
 		"account":      client.Account,
+	}).SetHeaders(map[string]string{
+		"Content-Type": postContentType,
+		"User-Agent":   userAgent + client.version,
 	})
-	httpRequest.SetHeaders(map[string]string{"Content-Type": postContentType, "User-Agent": userAgent + client.version})
+
 	return &API{HttpRequest: httpRequest}
 }
 
@@ -81,6 +85,7 @@ func (api *API) DeleteValue(deleteValue string) *API {
 	}
 	return api
 }
+
 func (api *API) GetUserInfo() (*hbookermodel.UserInfo, error) {
 	return newRequest[hbookermodel.UserInfo](api.HttpRequest).handleResponse(urlconstants.MY_DETAILS_INFO, nil)
 }
@@ -95,10 +100,11 @@ func (api *API) GetChapterKey(chapterId string) (*hbookermodel.ContentKey, error
 
 func (api *API) GetChapterContentAPI(chapterId, chapterKey string) (*hbookermodel.ChapterInfo, error) {
 	data := map[string]string{"chapter_id": chapterId, "chapter_command": chapterKey}
-	content, ok := newRequest[hbookermodel.Content](api.HttpRequest).handleResponse(urlconstants.GetCptIfm, data)
-	if ok != nil {
-		return nil, ok
+	content, err := newRequest[hbookermodel.Content](api.HttpRequest).handleResponse(urlconstants.GetCptIfm, data)
+	if err != nil {
+		return nil, err
 	}
+
 	contentRaw, err := aesDecrypt(content.Data.ChapterInfo.TxtContent, chapterKey)
 	if err != nil {
 		return nil, fmt.Errorf("aesDecrypt error: %v", err)
