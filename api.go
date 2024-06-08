@@ -43,11 +43,6 @@ func (request *Request[T]) handleResponse(url string, formData map[string]string
 func newRequest[T any](HttpRequest *req.Request) *Request[T] {
 	return &Request[T]{HttpRequest: HttpRequest}
 }
-
-func (api *API) GetBookInfo(bookId string) (*hbookermodel.Detail, error) {
-	return newRequest[hbookermodel.Detail](api.HttpRequest).handleResponse(urlconstants.BookGetInfoById, map[string]string{"book_id": bookId})
-}
-
 func (client *Client) API() *API {
 	if client.debug {
 		client.HttpsClient.DevMode()
@@ -79,6 +74,11 @@ func (client *Client) API() *API {
 	return &API{HttpRequest: httpRequest}
 }
 
+func (api *API) GetBookInfo(bookId string) (*hbookermodel.Detail, error) {
+	data := map[string]string{"book_id": bookId}
+	return newRequest[hbookermodel.Detail](api.HttpRequest).handleResponse(urlconstants.GetInfoById, data)
+}
+
 func (api *API) DeleteValue(deleteValue string) *API {
 	if api.HttpRequest.FormData != nil {
 		delete(api.HttpRequest.FormData, deleteValue)
@@ -87,7 +87,7 @@ func (api *API) DeleteValue(deleteValue string) *API {
 }
 
 func (api *API) GetUserInfo() (*hbookermodel.UserInfo, error) {
-	return newRequest[hbookermodel.UserInfo](api.HttpRequest).handleResponse(urlconstants.MY_DETAILS_INFO, nil)
+	return newRequest[hbookermodel.UserInfo](api.HttpRequest).handleResponse(urlconstants.MyDetailsInfo, nil)
 }
 
 func (api *API) GetDivisionListByBookId(bookId string) (*hbookermodel.Division, error) {
@@ -95,8 +95,9 @@ func (api *API) GetDivisionListByBookId(bookId string) (*hbookermodel.Division, 
 	return newRequest[hbookermodel.Division](api.HttpRequest).handleResponse(urlconstants.GetUpdatedChapterByDivisionNew, data)
 }
 
-func (api *API) GetChapterKey(chapterId string) (*hbookermodel.ContentKey, error) {
-	return newRequest[hbookermodel.ContentKey](api.HttpRequest).handleResponse(urlconstants.GetChapterKey, map[string]string{"chapter_id": chapterId})
+func (api *API) GetChapterCmd(chapterId string) (*hbookermodel.ChapterCmd, error) {
+	data := map[string]string{"chapter_id": chapterId}
+	return newRequest[hbookermodel.ChapterCmd](api.HttpRequest).handleResponse(urlconstants.GetChapterCmd, data)
 }
 
 func (api *API) GetChapterContentAPI(chapterId, chapterKey string) (*hbookermodel.ChapterInfo, error) {
@@ -136,7 +137,8 @@ func (api *API) GetAutoSignAPI(device string) (*hbookermodel.Register, error) {
 }
 
 func (api *API) GetUseGeetestAPI(loginName string) (*hbookermodel.Geetest, error) {
-	return newRequest[hbookermodel.Geetest](api.HttpRequest).handleResponse(urlconstants.UseGeetest, map[string]string{"login_name": loginName})
+	data := map[string]string{"login_name": loginName}
+	return newRequest[hbookermodel.Geetest](api.HttpRequest).handleResponse(urlconstants.UseGeetest, data)
 }
 
 func (api *API) GetGeetestRegisterAPI(UserID string) (*hbookermodel.GeetestFirstRegisterStruct, error) {
@@ -155,5 +157,5 @@ func (api *API) GetBookShelfInfoAPI() (*hbookermodel.Bookshelf, error) {
 
 func (api *API) GetSearchBooksAPI(keyword string, page any) (*hbookermodel.Search, error) {
 	data := map[string]string{"count": "10", "page": fmt.Sprintf("%v", page), "category_index": "0", "key": keyword}
-	return newRequest[hbookermodel.Search](api.HttpRequest).handleResponse(urlconstants.BookcityGetFilterList, data)
+	return newRequest[hbookermodel.Search](api.HttpRequest).handleResponse(urlconstants.GetFilterSearchBookList, data)
 }

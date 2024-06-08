@@ -7,7 +7,7 @@ type Content struct {
 	} `json:"data" bson:"data"`
 }
 
-type ContentKey struct {
+type ChapterCmd struct {
 	Tip
 	Data struct {
 		Command string `json:"command" bson:"command"`

@@ -21,7 +21,7 @@ func (app *APP) SetThreadNum(threadNum int) *APP {
 }
 
 func (app *APP) DownloadByChapterId(chapterId string) (*hbookermodel.ChapterInfo, error) {
-	key, err := app.client.API().GetChapterKey(chapterId)
+	key, err := app.client.API().GetChapterCmd(chapterId)
 	if err != nil {
 		return nil, err
 	}
