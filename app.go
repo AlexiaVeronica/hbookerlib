@@ -90,8 +90,7 @@ func (app *APP) Search(keyword string, continueFunc continueFunction, contentFun
 		fmt.Println("Index:", index, "\t\t\tBookName:", book.BookName)
 	})
 	app.bookInfo = searchInfo.GetBook(input.IntInput("Please input the index of the book you want to download"))
-	app.Download(continueFunc, contentFunc)
-	return app
+	return app.Download(continueFunc, contentFunc)
 }
 
 func (app *APP) Bookshelf(continueFunc continueFunction, contentFunc contentFunction) *APP {
@@ -104,8 +103,7 @@ func (app *APP) Bookshelf(continueFunc continueFunction, contentFunc contentFunc
 		fmt.Println("Index:", index, "\t\t\tShelfName:", book.ShelfName, "\t\t\tShelfNum:", book.BookLimit)
 
 	}
-	bookshelfId := shelf.Data.ShelfList[input.IntInput("input the index of the bookshelf")].ShelfID
-	bookshelf, err := app.client.API().GetBookcaseAPI(bookshelfId)
+	bookshelf, err := app.client.API().GetBookcaseAPI(shelf.Data.ShelfList[input.IntInput("input the index of the bookshelf")].ShelfID)
 	if err != nil {
 		fmt.Println("get bookshelf error:", err)
 		return app
@@ -114,8 +112,7 @@ func (app *APP) Bookshelf(continueFunc continueFunction, contentFunc contentFunc
 		fmt.Println("Index:", index, "\t\t\tBookName:", book.BookName)
 	})
 	app.bookInfo = bookshelf.GetBook(input.IntInput("Please input the index of the book you want to download"))
-	app.Download(continueFunc, contentFunc)
-	return app
+	return app.Download(continueFunc, contentFunc)
 }
 
 func (app *APP) MergeText(f func(chapter hbookermodel.ChapterList)) {
