@@ -1,22 +1,20 @@
 package hbookerLib
 
 import (
+	"github.com/AlexiaVeronica/hbookerLib/hbookermodel"
 	"github.com/AlexiaVeronica/hbookerLib/urlconstants"
 	"github.com/imroc/req/v3"
 )
 
 type Client struct {
-	version       string
 	baseURL       string
 	androidApiKey string
-	deviceToken   string
-	LoginToken    string
-	Account       string
 	debug         bool
 	retryCount    int
 	outputDebug   bool
 	proxyURL      string
 	HttpsClient   *req.Client
+	Authenticate  *hbookermodel.Authenticate
 }
 
 type API struct {
@@ -24,17 +22,16 @@ type API struct {
 }
 
 func defaultConfig() *Client {
-	client := &Client{HttpsClient: req.NewClient()}
-	for _, option := range []Options{
-		WithVersion(version),
-		WithRetryCount(retryCount),
-		WithDeviceToken(deviceToken),
-		WithAndroidApiKey(androidApiKey),
-		WithAPIBaseURL(urlconstants.WEB_SITE),
-	} {
-		option.Apply(client)
+	return &Client{
+		HttpsClient: req.NewClient(),
+		Authenticate: &hbookermodel.Authenticate{
+			AppVersion:  version,
+			DeviceToken: deviceToken,
+		},
+		retryCount:    retryCount,
+		androidApiKey: androidApiKey,
+		baseURL:       urlconstants.WEB_SITE,
 	}
-	return client
 }
 
 func NewClient(options ...Options) *Client {
@@ -42,7 +39,6 @@ func NewClient(options ...Options) *Client {
 	for _, option := range options {
 		option.Apply(client)
 	}
-
 	return client
 }
 func (client *Client) SetToken(account, loginToken string) *Client {

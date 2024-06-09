@@ -1,10 +1,7 @@
 package hbookerLib
 
 import (
-	"fmt"
 	"regexp"
-	"strconv"
-	"strings"
 )
 
 type Options interface {
@@ -18,28 +15,17 @@ func (f OptionFunc) Apply(client *Client) {
 
 func WithLoginToken(loginToken string) Options {
 	return OptionFunc(func(client *Client) {
-		if len(loginToken) == 32 {
-			client.LoginToken = loginToken
-		}
+		client.Authenticate.SetLoginToken(loginToken)
 	})
 }
 func WithAccount(account string) Options {
 	return OptionFunc(func(client *Client) {
-		if unquoted, err := strconv.Unquote(fmt.Sprintf(`"%s"`, account)); err == nil {
-			account = unquoted
-		}
-		// Check if the (possibly decoded) string contains "书客".
-		if strings.Contains(account, "书客") {
-			client.Account = account
-		}
+		client.Authenticate.SetAccount(account)
 	})
 }
 func WithVersion(version string) Options {
 	return OptionFunc(func(client *Client) {
-		// Regular expression to match semantic versioning (e.g., 1.0.0, 2.9.290)
-		if regexp.MustCompile(`^\d+\.\d+\.\d+$`).MatchString(version) {
-			client.version = version
-		}
+		client.Authenticate.SetAppVersion(version)
 	})
 }
 func WithRetryCount(retryCount int) Options {
@@ -84,6 +70,6 @@ func WithAndroidApiKey(androidApiKey string) Options {
 }
 func WithDeviceToken(deviceToken string) Options {
 	return OptionFunc(func(client *Client) {
-		client.deviceToken = deviceToken
+		client.Authenticate.SetDeviceToken(deviceToken)
 	})
 }

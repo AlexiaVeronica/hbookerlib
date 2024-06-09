@@ -60,15 +60,9 @@ func (client *Client) API() *API {
 		SetResponseBodyTransformer(func(rawBody []byte, _ *req.Request, _ *req.Response) ([]byte, error) {
 			return aesDecrypt(string(rawBody), client.androidApiKey)
 		}).R()
-
-	httpRequest.SetFormData(map[string]string{
-		"app_version":  client.version,
-		"device_token": client.deviceToken,
-		"login_token":  client.LoginToken,
-		"account":      client.Account,
-	}).SetHeaders(map[string]string{
+	httpRequest.SetFormData(client.Authenticate.GetAuthenticate()).SetHeaders(map[string]string{
 		"Content-Type": postContentType,
-		"User-Agent":   userAgent + client.version,
+		"User-Agent":   userAgent + client.Authenticate.AppVersion,
 	})
 
 	return &API{HttpRequest: httpRequest}
