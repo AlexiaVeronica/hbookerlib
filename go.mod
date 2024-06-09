@@ -4,7 +4,7 @@ go 1.22.0
 
 require (
 	github.com/AlexiaVeronica/input v0.0.1
-	github.com/imroc/req/v3 v3.43.7
+	github.com/AlexiaVeronica/req/v3 v3.43.5
 )
 
 require (

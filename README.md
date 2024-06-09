@@ -61,8 +61,8 @@ The `HbookerLib` package provides the following methods:
 
 - `GetBookInfo(bookId string) (*models.BookInfo, error)`: Retrieves the information of a book by its ID.
 - `GetDivisionListByBookId(bookId string) ([]models.VolumeList, error)`: Retrieves the division list of a book by its ID.
-- `GetKetByChapterId(chapterId string) (string, error)`: Retrieves the key of a chapter by its ID.
-- `GetChapterContentAPI(chapterId, chapterKey string) (*models.ChapterInfo, error)`: Retrieves the content of a chapter by its ID and key.
+- `GetChapterCmd(chapterId string) (string, error)`: Retrieves the key of a chapter by its ID.
+- `GetCptIfm(chapterId, chapterKey string) (*models.ChapterInfo, error)`: Retrieves the content of a chapter by its ID and key.
 - `GetLoginTokenAPI(username, password string) (*models.Login, error)`: Retrieves the login token for the specified username and password.
 - `GetBuyChapterAPI(chapterId, shelfId string) (*models.ContentBuy, error)`: Buys a chapter with the specified ID and adds it to the specified shelf.
 - `GetAutoSignAPI(device string) (*models.LoginData, error)`: Retrieves the auto sign information for the specified device.

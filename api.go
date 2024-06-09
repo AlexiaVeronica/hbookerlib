@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/AlexiaVeronica/hbookerLib/hbookermodel"
 	"github.com/AlexiaVeronica/hbookerLib/urlconstants"
-	"github.com/imroc/req/v3"
+	"github.com/AlexiaVeronica/req/v3"
 	"strconv"
 	"time"
 )
@@ -94,7 +94,7 @@ func (api *API) GetChapterCmd(chapterId string) (*hbookermodel.ChapterCmd, error
 	return newRequest[hbookermodel.ChapterCmd](api.HttpRequest).handleResponse(urlconstants.GetChapterCmd, data)
 }
 
-func (api *API) GetChapterContentAPI(chapterId, chapterKey string) (*hbookermodel.ChapterInfo, error) {
+func (api *API) GetCptIfm(chapterId, chapterKey string) (*hbookermodel.ChapterInfo, error) {
 	data := map[string]string{"chapter_id": chapterId, "chapter_command": chapterKey}
 	content, err := newRequest[hbookermodel.Content](api.HttpRequest).handleResponse(urlconstants.GetCptIfm, data)
 	if err != nil {

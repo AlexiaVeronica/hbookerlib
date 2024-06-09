@@ -25,7 +25,7 @@ func (app *APP) DownloadByChapterId(chapterId string) (*hbookermodel.ChapterInfo
 	if err != nil {
 		return nil, err
 	}
-	return app.client.API().GetChapterContentAPI(chapterId, key.Data.Command)
+	return app.client.API().GetCptIfm(chapterId, key.Data.Command)
 }
 
 func (app *APP) EachChapter(bookId string, f func(hbookermodel.ChapterList)) {

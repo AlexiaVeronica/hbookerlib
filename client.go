@@ -3,7 +3,7 @@ package hbookerLib
 import (
 	"github.com/AlexiaVeronica/hbookerLib/hbookermodel"
 	"github.com/AlexiaVeronica/hbookerLib/urlconstants"
-	"github.com/imroc/req/v3"
+	"github.com/AlexiaVeronica/req/v3"
 )
 
 type Client struct {
