@@ -32,16 +32,14 @@ type Bookcase struct {
 	ScrollChests []interface{} `json:"scroll_chests"`
 }
 
-func (shelfBook *Bookcase) EachBook(f func(int, BookInfo)) {
-	if shelfBook.Data.BookList != nil {
-		for i, book := range shelfBook.Data.BookList {
-			f(i, book.BookInfo)
-		}
+func (shelfBook *Bookcase) Each(f func(int, BookInfo)) {
+	for i, book := range shelfBook.Data.BookList {
+		f(i, book.BookInfo)
 	}
 
 }
 func (shelfBook *Bookcase) GetBook(index int) *BookInfo {
-	if shelfBook.Data.BookList != nil && index < len(shelfBook.Data.BookList) {
+	if index >= 0 && index < len(shelfBook.Data.BookList) {
 		return &shelfBook.Data.BookList[index].BookInfo
 	}
 	return nil

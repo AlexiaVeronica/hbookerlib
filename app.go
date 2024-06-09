@@ -71,7 +71,7 @@ func (app *APP) Search(keyword string, f1 continueFunction, f2 contentFunction) 
 		fmt.Println("search failed!" + err.Error())
 		return
 	}
-	searchInfo.EachBook(func(index int, book hbookermodel.BookInfo) {
+	searchInfo.Each(func(index int, book hbookermodel.BookInfo) {
 		fmt.Println("Index:", index, "\t\t\tBookName:", book.BookName)
 	})
 	bookInfo := searchInfo.GetBook(input.IntInput("Please input the index of the book you want to download"))
@@ -94,7 +94,7 @@ func (app *APP) Bookshelf(f1 continueFunction, f2 contentFunction) {
 		fmt.Println("get bookshelf error:", err)
 		return
 	}
-	bookshelf.EachBook(func(index int, book hbookermodel.BookInfo) {
+	bookshelf.Each(func(index int, book hbookermodel.BookInfo) {
 		fmt.Println("Index:", index, "\t\t\tBookName:", book.BookName)
 	})
 	bookInfo := bookshelf.GetBook(input.IntInput("Please input the index of the book you want to download"))

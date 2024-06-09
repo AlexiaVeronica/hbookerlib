@@ -13,16 +13,14 @@ type SearchData struct {
 	BookList []BookInfo `json:"book_list"`
 }
 
-func (search *Search) EachBook(f func(int, BookInfo)) {
-	if search.Data.BookList != nil {
-		for i, book := range search.Data.BookList {
-			f(i, book)
-		}
+func (search *Search) Each(f func(int, BookInfo)) {
+	for i, book := range search.Data.BookList {
+		f(i, book)
 	}
-
 }
+
 func (search *Search) GetBook(index int) *BookInfo {
-	if search.Data.BookList != nil && index < len(search.Data.BookList) {
+	if index >= 0 && index < len(search.Data.BookList) {
 		return &search.Data.BookList[index]
 	}
 	return nil
