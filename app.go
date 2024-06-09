@@ -9,15 +9,24 @@ import (
 
 type APP struct {
 	threadNum int
+	bookInfo  *hbookermodel.BookInfo
 	client    *Client
 }
 
 func (client *Client) APP() *APP {
-	return &APP{client: client, threadNum: 32}
+	return &APP{client: client, threadNum: threadNum}
 }
 func (app *APP) SetThreadNum(threadNum int) *APP {
 	app.threadNum = threadNum
 	return app
+}
+func (app *APP) SetBookInfo(bookInfo *hbookermodel.BookInfo) *APP {
+	app.bookInfo = bookInfo
+	return app
+}
+func (app *APP) GetBookInfo() *hbookermodel.BookInfo {
+	return app.bookInfo
+
 }
 
 func (app *APP) DownloadByChapterId(chapterId string) (*hbookermodel.ChapterInfo, error) {
@@ -28,23 +37,28 @@ func (app *APP) DownloadByChapterId(chapterId string) (*hbookermodel.ChapterInfo
 	return app.client.API().GetCptIfm(chapterId, key.Data.Command)
 }
 
-func (app *APP) EachChapter(bookId string, f func(hbookermodel.ChapterList)) {
-	divisionList, err := app.client.API().GetDivisionListByBookId(bookId)
+func (app *APP) eachChapter(f func(hbookermodel.ChapterList)) *APP {
+	divisionList, err := app.client.API().GetDivisionListByBookId(app.bookInfo.BookID)
 	if err != nil {
 		fmt.Println("get division list error:", err)
-		return
+		return app
 	}
 	for _, division := range divisionList.Data.ChapterList {
 		for _, chapter := range division.ChapterList {
 			f(chapter)
 		}
 	}
+	return app
 }
 
-func (app *APP) Download(bookId string, f1 continueFunction, f2 contentFunction) {
+func (app *APP) Download(continueFunc continueFunction, contentFunc contentFunction) *APP {
 	var wg sync.WaitGroup
+	if app.bookInfo == nil {
+		fmt.Println("Please set book info first!")
+		return app
+	}
 	ch := make(chan struct{}, app.threadNum)
-	app.EachChapter(bookId, func(chapter hbookermodel.ChapterList) {
+	app.eachChapter(func(chapter hbookermodel.ChapterList) {
 		wg.Add(1)
 		ch <- struct{}{}
 		go func(chapter hbookermodel.ChapterList) {
@@ -52,37 +66,39 @@ func (app *APP) Download(bookId string, f1 continueFunction, f2 contentFunction)
 				wg.Done()
 				<-ch
 			}()
-			if f1(chapter) {
+			if continueFunc(app.bookInfo, chapter) {
 				content, err := app.DownloadByChapterId(chapter.ChapterID)
 				if err != nil {
 					fmt.Println("get chapter content error:", err)
 					return
 				}
-				f2(content)
+				contentFunc(app.bookInfo, content)
 			}
 		}(chapter)
 	})
 	wg.Wait()
+	return app
 }
 
-func (app *APP) Search(keyword string, f1 continueFunction, f2 contentFunction) {
+func (app *APP) Search(keyword string, continueFunc continueFunction, contentFunc contentFunction) *APP {
 	searchInfo, err := app.client.API().GetSearchBooksAPI(keyword, 0)
 	if err != nil {
 		fmt.Println("search failed!" + err.Error())
-		return
+		return app
 	}
 	searchInfo.Each(func(index int, book hbookermodel.BookInfo) {
 		fmt.Println("Index:", index, "\t\t\tBookName:", book.BookName)
 	})
-	bookInfo := searchInfo.GetBook(input.IntInput("Please input the index of the book you want to download"))
-	app.Download(bookInfo.BookID, f1, f2)
+	app.bookInfo = searchInfo.GetBook(input.IntInput("Please input the index of the book you want to download"))
+	app.Download(continueFunc, contentFunc)
+	return app
 }
 
-func (app *APP) Bookshelf(f1 continueFunction, f2 contentFunction) {
+func (app *APP) Bookshelf(continueFunc continueFunction, contentFunc contentFunction) *APP {
 	shelf, err := app.client.API().GetBookShelfInfoAPI()
 	if err != nil {
 		fmt.Println("get bookshelf error:", err)
-		return
+		return app
 	}
 	for index, book := range shelf.Data.ShelfList {
 		fmt.Println("Index:", index, "\t\t\tShelfName:", book.ShelfName, "\t\t\tShelfNum:", book.BookLimit)
@@ -92,12 +108,20 @@ func (app *APP) Bookshelf(f1 continueFunction, f2 contentFunction) {
 	bookshelf, err := app.client.API().GetBookcaseAPI(bookshelfId)
 	if err != nil {
 		fmt.Println("get bookshelf error:", err)
-		return
+		return app
 	}
 	bookshelf.Each(func(index int, book hbookermodel.BookInfo) {
 		fmt.Println("Index:", index, "\t\t\tBookName:", book.BookName)
 	})
-	bookInfo := bookshelf.GetBook(input.IntInput("Please input the index of the book you want to download"))
-	app.Download(bookInfo.BookID, f1, f2)
+	app.bookInfo = bookshelf.GetBook(input.IntInput("Please input the index of the book you want to download"))
+	app.Download(continueFunc, contentFunc)
+	return app
+}
 
+func (app *APP) MergeText(f func(chapter hbookermodel.ChapterList)) {
+	if app.bookInfo == nil {
+		fmt.Println("Please set book info first!")
+		return
+	}
+	app.eachChapter(f)
 }
