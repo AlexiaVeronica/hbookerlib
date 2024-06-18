@@ -1,10 +1,13 @@
 package hbookerLib
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"github.com/AlexiaVeronica/hbookerLib/hbookermodel"
 	"github.com/AlexiaVeronica/hbookerLib/urlconstants"
 	"github.com/AlexiaVeronica/req/v3"
+	"log"
 	"strconv"
 	"time"
 )
@@ -60,6 +63,16 @@ func (client *Client) API() *API {
 		SetResponseBodyTransformer(func(rawBody []byte, _ *req.Request, _ *req.Response) ([]byte, error) {
 			return aesDecrypt(string(rawBody), client.androidApiKey)
 		}).R()
+	bytes := make([]byte, 16)
+
+	_, err := rand.Read(bytes)
+	if err != nil {
+		log.Fatal(err)
+	}
+	client.Authenticate.SetRandStr(hex.EncodeToString(bytes))
+	client.Authenticate.SetRefresh("1")
+	client.Authenticate.SetTimestamp(strconv.FormatInt(time.Now().UnixNano()/1e6, 10))
+	client.Authenticate.SetSignatures("kuangxiang.HappyBook")
 	httpRequest.SetFormData(client.Authenticate.GetAuthenticate()).SetHeaders(map[string]string{
 		"Content-Type": postContentType,
 		"User-Agent":   userAgent + client.Authenticate.AppVersion,

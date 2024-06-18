@@ -4,6 +4,7 @@ import (
 	"github.com/AlexiaVeronica/hbookerLib/hbookermodel"
 	"github.com/AlexiaVeronica/hbookerLib/urlconstants"
 	"github.com/AlexiaVeronica/req/v3"
+	"github.com/google/uuid"
 )
 
 type Client struct {
@@ -33,9 +34,20 @@ func defaultConfig() *Client {
 		baseURL:       urlconstants.WEB_SITE,
 	}
 }
-
+func defaultIosConfig() *Client {
+	return &Client{
+		HttpsClient: req.NewClient(),
+		Authenticate: &hbookermodel.Authenticate{
+			AppVersion:  versionIos,
+			DeviceToken: deviceIosToken + uuid.New().String(),
+		},
+		retryCount:    retryCount,
+		androidApiKey: androidApiKey,
+		baseURL:       urlconstants.WEB_SITE,
+	}
+}
 func NewClient(options ...Options) *Client {
-	client := defaultConfig()
+	client := defaultIosConfig()
 	for _, option := range options {
 		option.Apply(client)
 	}
