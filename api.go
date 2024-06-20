@@ -1,13 +1,10 @@
 package hbookerLib
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"fmt"
 	"github.com/AlexiaVeronica/hbookerLib/hbookermodel"
 	"github.com/AlexiaVeronica/hbookerLib/urlconstants"
 	"github.com/AlexiaVeronica/req/v3"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -64,15 +61,8 @@ func (client *Client) API() *API {
 		SetResponseBodyTransformer(func(rawBody []byte, _ *req.Request, _ *req.Response) ([]byte, error) {
 			return aesDecrypt(string(rawBody), client.apiKey)
 		}).R()
-	bytes := make([]byte, 16)
-
-	_, err := rand.Read(bytes)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	if strings.Contains(client.Authenticate.DeviceToken, deviceIosToken) {
-		client.Authenticate.SetRandStr(hex.EncodeToString(bytes))
+		client.Authenticate.SetRandStr(randString())
 		client.Authenticate.SetRefresh("1")
 		client.Authenticate.SetTimestamp(strconv.FormatInt(time.Now().UnixNano()/1e6, 10))
 		client.Authenticate.SetSignatures(IosSignaturesKey)

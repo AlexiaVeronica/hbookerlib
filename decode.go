@@ -19,6 +19,15 @@ import (
 	"os"
 )
 
+func randString() string {
+	bytes := make([]byte, 16)
+	_, err := rand.Read(bytes)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return hex.EncodeToString(bytes)
+}
+
 // SHA256 sha256 编码
 func enSha256(data string) []byte {
 	ret := sha256.Sum256([]byte(data))
@@ -167,12 +176,7 @@ func (rsaUtil *RSAUtil) GetAuthenticate(authenticate *hbookermodel.Authenticate)
 }
 
 func SetNewVersionP(authenticate *hbookermodel.Authenticate) {
-	bytes := make([]byte, 16)
-	_, err := rand.Read(bytes)
-	if err != nil {
-		log.Fatal(err)
-	}
-	authenticate.SetRandStr(hex.EncodeToString(bytes))
+	authenticate.SetRandStr(randString())
 	authenticate.SetSignatures(hmacKey + androidSignaturesKey)
 	h := hmac.New(sha256.New, []byte(hmacKey))
 	h.Write([]byte(authenticate.GetQueryParams()))
