@@ -71,7 +71,7 @@ func (client *Client) API() *API {
 		log.Fatal(err)
 	}
 
-	if strings.Contains(client.Authenticate.DeviceToken, "iPhone") {
+	if strings.Contains(client.Authenticate.DeviceToken, deviceIosToken) {
 		client.Authenticate.SetRandStr(hex.EncodeToString(bytes))
 		client.Authenticate.SetRefresh("1")
 		client.Authenticate.SetTimestamp(strconv.FormatInt(time.Now().UnixNano()/1e6, 10))

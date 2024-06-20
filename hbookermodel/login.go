@@ -97,6 +97,11 @@ func (authenticate *Authenticate) GetQueryParams() string {
 		log.Panicln("Error unmarshalling Authenticate:", err)
 		return ""
 	}
+
+	if strings.Contains(authenticate.DeviceToken, "iPhone") {
+		delete(query, "refresh")
+		delete(query, "ts")
+	}
 	var queryParams string
 	for k, v := range query {
 		queryParams += fmt.Sprintf("&%v=%v", k, v)
@@ -111,6 +116,10 @@ func (authenticate *Authenticate) GetQueryMap() map[string]string {
 	if err != nil {
 		log.Panicln("Error unmarshalling Authenticate:", err)
 		return nil
+	}
+	if strings.Contains(authenticate.DeviceToken, "iPhone") {
+		delete(query, "refresh")
+		delete(query, "ts")
 	}
 	return query
 }

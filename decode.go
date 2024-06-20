@@ -44,21 +44,6 @@ func aesDecrypt(contentText string, encryptKey string) ([]byte, error) {
 	return plainText[:(len(plainText) - int(plainText[len(plainText)-1]))], nil
 }
 
-func SetNewVersionP(authenticate *hbookermodel.Authenticate) {
-	bytes := make([]byte, 16)
-	_, err := rand.Read(bytes)
-	if err != nil {
-		log.Fatal(err)
-	}
-	authenticate.SetRandStr(hex.EncodeToString(bytes))
-	authenticate.SetSignatures(hmacKey + signaturesKey)
-	h := hmac.New(sha256.New, []byte(hmacKey))
-	h.Write([]byte(authenticate.GetQueryParams()))
-	p := h.Sum(nil)
-	authenticate.SetP(base64.StdEncoding.EncodeToString(p))
-
-}
-
 type RSAUtil struct{}
 
 // GetPublicKeyRefWithKey 从 base64 编码的字符串中获取公钥
@@ -179,4 +164,19 @@ func (rsaUtil *RSAUtil) GetAuthenticate(authenticate *hbookermodel.Authenticate)
 	} else {
 		authenticate.SetP(publicKey)
 	}
+}
+
+func SetNewVersionP(authenticate *hbookermodel.Authenticate) {
+	bytes := make([]byte, 16)
+	_, err := rand.Read(bytes)
+	if err != nil {
+		log.Fatal(err)
+	}
+	authenticate.SetRandStr(hex.EncodeToString(bytes))
+	authenticate.SetSignatures(hmacKey + signaturesKey)
+	h := hmac.New(sha256.New, []byte(hmacKey))
+	h.Write([]byte(authenticate.GetQueryParams()))
+	p := h.Sum(nil)
+	authenticate.SetP(base64.StdEncoding.EncodeToString(p))
+
 }
