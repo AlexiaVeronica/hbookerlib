@@ -75,14 +75,12 @@ func (client *Client) API() *API {
 		client.Authenticate.SetRandStr(hex.EncodeToString(bytes))
 		client.Authenticate.SetRefresh("1")
 		client.Authenticate.SetTimestamp(strconv.FormatInt(time.Now().UnixNano()/1e6, 10))
-		client.Authenticate.SetSignatures("kuangxiang.HappyBook")
+		client.Authenticate.SetSignatures(IosSignaturesKey)
 		httpRequest.SetHeader("User-Agent", fmt.Sprintf(iosUserAgent, client.Authenticate.AppVersion))
 	} else {
 		SetNewVersionP(client.Authenticate)
 		httpRequest.SetHeader("User-Agent", fmt.Sprintf(androidUserAgent, client.Authenticate.AppVersion))
 	}
-	httpRequest.SetFormData(client.Authenticate.GetQueryMap()).SetHeader("Content-Type", postContentType)
-
 	return &API{HttpRequest: httpRequest}
 }
 

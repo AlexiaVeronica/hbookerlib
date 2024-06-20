@@ -23,9 +23,12 @@ type API struct {
 	HttpRequest *req.Request
 }
 
+func defaultReqClient() *req.Client {
+	return req.NewClient().SetCommonHeader("Content-Type", postContentType)
+}
 func defaultAndroidConfig() *Client {
 	return &Client{
-		HttpsClient: req.NewClient(),
+		HttpsClient: defaultReqClient(),
 		Authenticate: &hbookermodel.Authenticate{
 			AppVersion:  version,
 			DeviceToken: deviceToken,
@@ -37,7 +40,7 @@ func defaultAndroidConfig() *Client {
 }
 func defaultIosConfig() *Client {
 	return &Client{
-		HttpsClient: req.NewClient(),
+		HttpsClient: defaultReqClient(),
 		Authenticate: &hbookermodel.Authenticate{
 			AppVersion:  versionIos,
 			DeviceToken: deviceIosToken + uuid.New().String(),

@@ -173,7 +173,7 @@ func SetNewVersionP(authenticate *hbookermodel.Authenticate) {
 		log.Fatal(err)
 	}
 	authenticate.SetRandStr(hex.EncodeToString(bytes))
-	authenticate.SetSignatures(hmacKey + signaturesKey)
+	authenticate.SetSignatures(hmacKey + androidSignaturesKey)
 	h := hmac.New(sha256.New, []byte(hmacKey))
 	h.Write([]byte(authenticate.GetQueryParams()))
 	p := h.Sum(nil)
