@@ -6,7 +6,7 @@ import (
 
 const (
 	retryCount       = 5
-	version          = "2.9.328"
+	versionAndroid   = "2.9.328"
 	versionIos       = "3.2.710"
 	deviceToken      = "ciweimao_"
 	deviceIosToken   = "iPhone-"

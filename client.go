@@ -30,7 +30,7 @@ func defaultAndroidConfig() *Client {
 	return &Client{
 		HttpsClient: defaultReqClient(),
 		Authenticate: &hbookermodel.Authenticate{
-			AppVersion:  version,
+			AppVersion:  versionAndroid,
 			DeviceToken: deviceToken,
 		},
 		retryCount: retryCount,
