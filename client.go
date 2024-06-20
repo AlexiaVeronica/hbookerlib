@@ -26,53 +26,47 @@ type API struct {
 func defaultReqClient() *req.Client {
 	return req.NewClient().SetCommonHeader("Content-Type", postContentType)
 }
-func defaultAndroidConfig() *Client {
+
+func configureClient(client *Client, options []Options) {
+	for _, option := range options {
+		option.Apply(client)
+	}
+}
+
+func defaultConfig(version, deviceToken string) *Client {
 	client := &Client{HttpsClient: defaultReqClient()}
 	options := []Options{
-		WithVersion(versionAndroid),
+		WithVersion(version),
 		WithDeviceToken(deviceToken),
 		WithRetryCount(retryCount),
 		WithApiKey(apiKey),
 		WithAPIBaseURL(urlconstants.WEB_SITE),
 	}
-	for _, option := range options {
-		option.Apply(client)
-	}
+	configureClient(client, options)
 	return client
 }
+
+func defaultAndroidConfig() *Client {
+	return defaultConfig(versionAndroid, deviceToken)
+}
+
 func defaultIosConfig() *Client {
-	client := &Client{HttpsClient: defaultReqClient()}
-	options := []Options{
-		WithVersion(versionIos),
-		WithDeviceToken(deviceIosToken + uuid.New().String()),
-		WithRetryCount(retryCount),
-		WithApiKey(apiKey),
-		WithAPIBaseURL(urlconstants.WEB_SITE),
-	}
-	for _, option := range options {
-		option.Apply(client)
-	}
-	return client
+	return defaultConfig(versionIos, deviceIosToken+uuid.New().String())
 }
+
 func NewClient(options ...Options) *Client {
-	if len(options) == 0 {
-		return defaultIosConfig()
-	} else {
-		client := defaultIosConfig()
-		for _, option := range options {
-			option.Apply(client)
-		}
+	client := defaultIosConfig()
+	if len(options) > 0 {
+		configureClient(client, options)
 		if !client.ios {
 			client = defaultAndroidConfig()
-			for _, option := range options {
-				option.Apply(client)
-			}
+			configureClient(client, options)
 		}
-		return client
 	}
-
+	return client
 }
-func (client *Client) SetToken(account, loginToken string) *Client {
+
+func (client *Client) SetLoginToken(account, loginToken string) *Client {
 	WithLoginToken(loginToken).Apply(client)
 	WithAccount(account).Apply(client)
 	return client
