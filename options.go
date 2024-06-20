@@ -69,9 +69,9 @@ func WithAPIBaseURL(apiBaseURL string) Options {
 	})
 }
 
-func WithAndroidApiKey(androidApiKey string) Options {
+func WithApiKey(apiKey string) Options {
 	return OptionFunc(func(client *Client) {
-		client.apiKey = androidApiKey
+		client.apiKey = apiKey
 	})
 }
 func WithDeviceToken(deviceToken string) Options {

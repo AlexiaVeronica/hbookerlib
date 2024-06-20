@@ -27,28 +27,32 @@ func defaultReqClient() *req.Client {
 	return req.NewClient().SetCommonHeader("Content-Type", postContentType)
 }
 func defaultAndroidConfig() *Client {
-	return &Client{
-		HttpsClient: defaultReqClient(),
-		Authenticate: &hbookermodel.Authenticate{
-			AppVersion:  versionAndroid,
-			DeviceToken: deviceToken,
-		},
-		retryCount: retryCount,
-		apiKey:     apiKey,
-		baseURL:    urlconstants.WEB_SITE,
+	client := &Client{HttpsClient: defaultReqClient()}
+	options := []Options{
+		WithVersion(versionAndroid),
+		WithDeviceToken(deviceToken),
+		WithRetryCount(retryCount),
+		WithApiKey(apiKey),
+		WithAPIBaseURL(urlconstants.WEB_SITE),
 	}
+	for _, option := range options {
+		option.Apply(client)
+	}
+	return client
 }
 func defaultIosConfig() *Client {
-	return &Client{
-		HttpsClient: defaultReqClient(),
-		Authenticate: &hbookermodel.Authenticate{
-			AppVersion:  versionIos,
-			DeviceToken: deviceIosToken + uuid.New().String(),
-		},
-		retryCount: retryCount,
-		apiKey:     apiKey,
-		baseURL:    urlconstants.WEB_SITE,
+	client := &Client{HttpsClient: defaultReqClient()}
+	options := []Options{
+		WithVersion(versionIos),
+		WithDeviceToken(deviceIosToken + uuid.New().String()),
+		WithRetryCount(retryCount),
+		WithApiKey(apiKey),
+		WithAPIBaseURL(urlconstants.WEB_SITE),
 	}
+	for _, option := range options {
+		option.Apply(client)
+	}
+	return client
 }
 func NewClient(options ...Options) *Client {
 	if len(options) == 0 {
