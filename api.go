@@ -9,6 +9,7 @@ import (
 	"github.com/AlexiaVeronica/req/v3"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -69,11 +70,16 @@ func (client *Client) API() *API {
 	if err != nil {
 		log.Fatal(err)
 	}
-	client.Authenticate.SetRandStr(hex.EncodeToString(bytes))
-	client.Authenticate.SetRefresh("1")
-	client.Authenticate.SetTimestamp(strconv.FormatInt(time.Now().UnixNano()/1e6, 10))
-	client.Authenticate.SetSignatures("kuangxiang.HappyBook")
-	httpRequest.SetFormData(client.Authenticate.GetAuthenticate()).SetHeaders(map[string]string{
+
+	if strings.Contains(client.Authenticate.DeviceToken, "iPhone") {
+		client.Authenticate.SetRandStr(hex.EncodeToString(bytes))
+		client.Authenticate.SetRefresh("1")
+		client.Authenticate.SetTimestamp(strconv.FormatInt(time.Now().UnixNano()/1e6, 10))
+		client.Authenticate.SetSignatures("kuangxiang.HappyBook")
+	} else {
+		SetNewVersionP(client.Authenticate)
+	}
+	httpRequest.SetFormData(client.Authenticate.GetQueryMap()).SetHeaders(map[string]string{
 		"Content-Type": postContentType,
 		"User-Agent":   userAgent + client.Authenticate.AppVersion,
 	})
