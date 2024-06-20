@@ -11,7 +11,7 @@ const (
 	deviceToken     = "ciweimao_"
 	deviceIosToken  = "iPhone-"
 	threadNum       = 32
-	androidApiKey   = "zG2nSeEfSHfvTCHy5LCcqtBbQehKNLXn"
+	apiKey          = "zG2nSeEfSHfvTCHy5LCcqtBbQehKNLXn"
 	userAgent       = "Android com.kuangxiangciweimao.novel "
 	postContentType = "application/x-www-form-urlencoded"
 	ivBase64        = "AAAAAAAAAAAAAAAAAAAAAA=="

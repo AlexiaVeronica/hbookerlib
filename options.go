@@ -28,6 +28,12 @@ func WithVersion(version string) Options {
 		client.Authenticate.SetAppVersion(version)
 	})
 }
+func WithIos() Options {
+	return OptionFunc(func(client *Client) {
+		client.ios = true
+	})
+
+}
 func WithRetryCount(retryCount int) Options {
 	return OptionFunc(func(client *Client) {
 		if retryCount > 0 {
@@ -65,7 +71,7 @@ func WithAPIBaseURL(apiBaseURL string) Options {
 
 func WithAndroidApiKey(androidApiKey string) Options {
 	return OptionFunc(func(client *Client) {
-		client.androidApiKey = androidApiKey
+		client.apiKey = androidApiKey
 	})
 }
 func WithDeviceToken(deviceToken string) Options {

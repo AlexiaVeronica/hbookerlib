@@ -62,7 +62,7 @@ func (client *Client) API() *API {
 		SetCommonRetryCount(client.retryCount).
 		SetBaseURL(client.baseURL).
 		SetResponseBodyTransformer(func(rawBody []byte, _ *req.Request, _ *req.Response) ([]byte, error) {
-			return aesDecrypt(string(rawBody), client.androidApiKey)
+			return aesDecrypt(string(rawBody), client.apiKey)
 		}).R()
 	bytes := make([]byte, 16)
 

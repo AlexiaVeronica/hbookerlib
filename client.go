@@ -8,30 +8,31 @@ import (
 )
 
 type Client struct {
-	baseURL       string
-	androidApiKey string
-	debug         bool
-	retryCount    int
-	outputDebug   bool
-	proxyURL      string
-	HttpsClient   *req.Client
-	Authenticate  *hbookermodel.Authenticate
+	ios          bool
+	baseURL      string
+	apiKey       string
+	debug        bool
+	retryCount   int
+	outputDebug  bool
+	proxyURL     string
+	HttpsClient  *req.Client
+	Authenticate *hbookermodel.Authenticate
 }
 
 type API struct {
 	HttpRequest *req.Request
 }
 
-func defaultConfig() *Client {
+func defaultAndroidConfig() *Client {
 	return &Client{
 		HttpsClient: req.NewClient(),
 		Authenticate: &hbookermodel.Authenticate{
 			AppVersion:  version,
 			DeviceToken: deviceToken,
 		},
-		retryCount:    retryCount,
-		androidApiKey: androidApiKey,
-		baseURL:       urlconstants.WEB_SITE,
+		retryCount: retryCount,
+		apiKey:     apiKey,
+		baseURL:    urlconstants.WEB_SITE,
 	}
 }
 func defaultIosConfig() *Client {
@@ -41,17 +42,28 @@ func defaultIosConfig() *Client {
 			AppVersion:  versionIos,
 			DeviceToken: deviceIosToken + uuid.New().String(),
 		},
-		retryCount:    retryCount,
-		androidApiKey: androidApiKey,
-		baseURL:       urlconstants.WEB_SITE,
+		retryCount: retryCount,
+		apiKey:     apiKey,
+		baseURL:    urlconstants.WEB_SITE,
 	}
 }
 func NewClient(options ...Options) *Client {
-	client := defaultIosConfig()
-	for _, option := range options {
-		option.Apply(client)
+	if len(options) == 0 {
+		return defaultIosConfig()
+	} else {
+		client := defaultIosConfig()
+		for _, option := range options {
+			option.Apply(client)
+		}
+		if !client.ios {
+			client = defaultAndroidConfig()
+			for _, option := range options {
+				option.Apply(client)
+			}
+		}
+		return client
 	}
-	return client
+
 }
 func (client *Client) SetToken(account, loginToken string) *Client {
 	WithLoginToken(loginToken).Apply(client)
