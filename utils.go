@@ -5,16 +5,17 @@ import (
 )
 
 const (
-	retryCount      = 5
-	version         = "2.9.328"
-	versionIos      = "3.2.710"
-	deviceToken     = "ciweimao_"
-	deviceIosToken  = "iPhone-"
-	threadNum       = 32
-	apiKey          = "zG2nSeEfSHfvTCHy5LCcqtBbQehKNLXn"
-	userAgent       = "Android com.kuangxiangciweimao.novel "
-	postContentType = "application/x-www-form-urlencoded"
-	ivBase64        = "AAAAAAAAAAAAAAAAAAAAAA=="
+	retryCount       = 5
+	version          = "2.9.328"
+	versionIos       = "3.2.710"
+	deviceToken      = "ciweimao_"
+	deviceIosToken   = "iPhone-"
+	threadNum        = 32
+	apiKey           = "zG2nSeEfSHfvTCHy5LCcqtBbQehKNLXn"
+	androidUserAgent = "Android com.kuangxiangciweimao.novel %v"
+	iosUserAgent     = "HappyBook/%v (iPhone; iOS 14.5.1; Scale/2.00)"
+	postContentType  = "application/x-www-form-urlencoded"
+	ivBase64         = "AAAAAAAAAAAAAAAAAAAAAA=="
 
 	hmacKey       = "a90f3731745f1c30ee77cb13fc00005a"
 	signaturesKey = "CkMxWNB666"
